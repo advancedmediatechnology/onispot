@@ -13,7 +13,7 @@ import { Images, argonTheme, articles } from "../constants/";
 
 import { Card } from "../components/";
 import React from "react";
-
+import axios from 'axios';
 const { width } = Dimensions.get("screen");
 
 const thumbMeasure = (width - 48 - 32) / 3;
@@ -37,21 +37,55 @@ const categories = [
   },
 ];
 
+const apiClient = axios.create({
+  baseURL: 'http://test.onispot.com/api/' ,
+  withCredentials: true,
+});
+
 class Articles extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      token:null,
+      campaigns:null,
+    }
+  }
+
+  async getCampaign() {
+    try {
+      apiClient.get('campaign/', 
+      { },
+      { headers: {Authorization: 'Bearer ' + this.state.token}})
+      .then(r => {
+        console.log(r.date);
+        this.setState({campaigns:r.data})
+      }).catch(e => { 
+        console.log(e);
+      }).finally(()=>{});
+    } catch(error) {
+        console.log(error);
+    };
+  
+  }
+
+  componentDidMount() {
+    this.getCampaign();
+  }
+
   renderProduct = (item, index) => {
     const { navigation } = this.props;
 
     return (
       <TouchableWithoutFeedback
         style={{ zIndex: 3 }}
-        key={`product-${item.title}`}
-        onPress={() => navigation.navigate("Pro", { product: item })}
+        key={item._id}
+        onPress={() => navigation.navigate("Newcampaign", { campaign: item._id })}
       >
         <Block center style={styles.productItem}>
           <Image
             resizeMode="cover"
             style={styles.productImage}
-            source={{ uri: item.image }}
+            source={{ uri: item.cover_url }}
           />
           <Block center style={{ paddingHorizontal: theme.SIZES.BASE }}>
             <Text
@@ -60,10 +94,10 @@ class Articles extends React.Component {
               color={theme.COLORS.MUTED}
               style={styles.productPrice}
             >
-              {item.price}
+              {item.budget}
             </Text>
             <Text center size={34}>
-              {item.title}
+              {item.name}
             </Text>
             <Text
               center
@@ -80,13 +114,14 @@ class Articles extends React.Component {
   };
 
   renderCards = () => {
+    const {campaigns} = this.state;
     return (
       <Block flex style={styles.group}>
         <Text bold size={16} style={styles.title}>
           Cards
         </Text>
         <Block flex>
-          <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
+         {/* <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
             <Card item={articles[0]} horizontal />
             <Block flex row>
               <Card
@@ -110,12 +145,12 @@ class Articles extends React.Component {
               >
                 <Block style={styles.categoryTitle}>
                   <Text size={18} bold color={theme.COLORS.WHITE}>
-                    View article
+                    View articlhe
                   </Text>
                 </Block>
               </ImageBackground>
             </Block>
-          </Block>
+              </Block> */}
           <Block flex style={{ marginTop: theme.SIZES.BASE / 2 }}>
             <ScrollView
               horizontal={true}
@@ -129,8 +164,8 @@ class Articles extends React.Component {
                 paddingHorizontal: theme.SIZES.BASE / 2,
               }}
             >
-              {categories &&
-                categories.map((item, index) =>
+              {campaigns &&
+                campaigns.map((item, index) =>
                   this.renderProduct(item, index)
                 )}
             </ScrollView>

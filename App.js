@@ -5,6 +5,8 @@ import { useFonts } from '@use-expo/font';
 import { Asset } from "expo-asset";
 import { Block, GalioProvider } from "galio-framework";
 import { NavigationContainer } from "@react-navigation/native";
+import { StripeProvider } from '@stripe/stripe-react-native';
+
 
 // Before rendering any navigation stack
 import { enableScreens } from "react-native-screens";
@@ -67,13 +69,19 @@ export default props => {
     );
   } else if(fontsLoaded) {
     return (
-      <NavigationContainer>
-        <GalioProvider theme={argonTheme}>
-          <Block flex>
-            <Screens />
-          </Block>
-        </GalioProvider>
-      </NavigationContainer>
+      <StripeProvider
+          publishableKey="pk_test_XUIpXpyaGuuw0Dc9Ng80xFWs"
+          urlScheme="your-url-scheme" // required for 3D Secure and bank redirects
+          //merchantIdentifier="merchant.com.{{YOUR_APP_NAME}}" // required for Apple Pay
+      >
+        <NavigationContainer>
+          <GalioProvider theme={argonTheme}>
+            <Block flex>
+              <Screens />
+            </Block>
+          </GalioProvider>
+        </NavigationContainer>
+      </StripeProvider>
     );
   } else {
     return null

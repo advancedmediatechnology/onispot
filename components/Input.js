@@ -25,14 +25,7 @@ class ArInput extends React.Component {
         placeholderTextColor={argonTheme.COLORS.MUTED}
         style={inputStyles}
         color={argonTheme.COLORS.HEADER}
-        iconContent={
-          <Icon
-            size={14}
-            color={argonTheme.COLORS.ICON}
-            name="link"
-            family="AntDesign"
-          />
-        }
+        
         {...this.props}
       />
     );
@@ -56,7 +49,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderColor: argonTheme.COLORS.BORDER,
     height: 44,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#F7FAFC'
   },
   success: {
     borderColor: argonTheme.COLORS.INPUT_SUCCESS,

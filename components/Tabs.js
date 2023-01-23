@@ -80,7 +80,9 @@ export default class Tabs extends React.Component {
         <Animated.Text
           style={[
             styles.menuTitle,
-            { color: textColor }
+            { 
+              color: textColor,
+            }
           ]}
           onPress={() => this.selectMenu(item.id)}>
           {item.title}
@@ -137,7 +139,7 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: 'center',
-    backgroundColor: argonTheme.COLORS.ACTIVE,
+    backgroundColor: argonTheme.COLORS.PRIMARY,
     borderRadius: 4,
     marginRight: 9
   },

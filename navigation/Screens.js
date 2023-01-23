@@ -15,6 +15,13 @@ import Pro from "../screens/Pro";
 import Profile from "../screens/Profile";
 import React from "react";
 import Register from "../screens/Register";
+import Account from "../screens/Account";
+import Campaign from "../screens/Campaign";
+import CampaignCreativity from "../screens/CampaignCreativity";
+import CampaignPrefs from "../screens/CampaignPrefs";
+import CampaignTarget from "../screens/CampaignTarget";
+import CampaignAudience from "../screens/CampaignAudience";
+import WebhookPaymentScreen from "../screens/CheckoutForm";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -113,7 +120,7 @@ function ProfileStack(props) {
       }}
     >
       <Stack.Screen
-        name="Profile"
+        name="ProfileInt"
         component={Profile}
         options={{
           header: ({ navigation, scene }) => (
@@ -152,14 +159,9 @@ function ProfileStack(props) {
 
 function HomeStack(props) {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        mode: "card",
-        headerShown: "screen",
-      }}
-    >
+    <Stack.Navigator screenOptions={{mode: "card", headerShown: "screen",}} >
       <Stack.Screen
-        name="Home"
+        name="HomeInt"
         component={Home}
         options={{
           header: ({ navigation, scene }) => (
@@ -169,6 +171,130 @@ function HomeStack(props) {
               options
               navigation={navigation}
               scene={scene}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="Newcampaign"
+        component={Campaign}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Campaign"
+              back
+              transparent
+              navigation={navigation}
+              scene={scene}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="CampaignCreativity"
+        component={CampaignCreativity}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Campaign creativity"
+              back
+              transparent
+              navigation={navigation}
+              scene={scene}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="CampaignPrefs"
+        component={CampaignPrefs}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Campaign categories & styles"
+              back
+              transparent
+              navigation={navigation}
+              scene={scene}
+              tabIndex={0}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="CampaignTarget"
+        component={CampaignTarget}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Campaign target"
+              back
+              transparent
+              navigation={navigation}
+              scene={scene}
+              tabIndex={0}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="CampaignAudience"
+        component={CampaignAudience}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Campaign audience"
+              back
+              transparent
+              navigation={navigation}
+              scene={scene}
+              tabIndex={0}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="CampaignPayment"
+        component={WebhookPaymentScreen}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Campaign Payment"
+              back
+              transparent
+              navigation={navigation}
+              scene={scene}
+              tabIndex={0}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function AccountStack(props) {
+  return (
+    <Stack.Navigator screenOptions={{mode: "card", headerShown: "screen",}} >
+      <Stack.Screen
+        name="AccountInt"
+        component={Account}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header 
+              title="Account" 
+              navigation={navigation} 
+              scene={scene} 
+              transparent
+              tabs={[{id: 'personal', title: 'Personal data'},{id: 'preferences', title: 'Categories'},{id: 'styles', title: 'Styles'}]}
+              tabIndex={0}
             />
           ),
           cardStyle: { backgroundColor: "#F8F9FE" },
@@ -197,19 +323,9 @@ function HomeStack(props) {
 
 export default function OnboardingStack(props) {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        mode: "card",
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen
-        name="Onboarding"
-        component={Onboarding}
-        option={{
-          headerTransparent: true,
-        }}
-      />
+    <Stack.Navigator screenOptions={{mode: "card",headerShown: false,}} >
+      <Stack.Screen name="Onboarding" component={Onboarding}  />
+      <Stack.Screen name="Register" component={Register} />
       <Stack.Screen name="App" component={AppStack} />
     </Stack.Navigator>
   );
@@ -262,7 +378,8 @@ function AppStack(props) {
       />
       <Drawer.Screen
         name="Account"
-        component={Register}
+        component={AccountStack}
+        initialParams={{ itemId: 'personal' }}
         options={{
           headerShown: false,
         }}
@@ -275,7 +392,7 @@ function AppStack(props) {
         }}
       />
       <Drawer.Screen
-        name="Articles"
+        name="My Campaign"
         component={ArticlesStack}
         options={{
           headerShown: false,

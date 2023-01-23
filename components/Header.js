@@ -23,6 +23,17 @@ const BellButton = ({isWhite, style, navigation}) => (
   </TouchableOpacity>
 );
 
+const AddButton = ({isWhite, style, navigation}) => (
+  <TouchableOpacity style={[styles.button, style]} onPress={() => navigation.navigate('Newcampaign')}>
+    <Icon
+      family="Feather"
+      size={30}
+      name="plus-square"
+      color={argonTheme.COLORS[isWhite ? 'WHITE' : 'ICON']}
+    />
+  </TouchableOpacity>
+);
+
 const BasketButton = ({isWhite, style, navigation}) => (
   <TouchableOpacity style={[styles.button, style]} onPress={() => navigation.navigate('Pro')}>
     <Icon
@@ -63,8 +74,7 @@ class Header extends React.Component {
     switch (title) {
       case 'Home':
         return ([
-          <BellButton key='chat-home' navigation={navigation} isWhite={white} />,
-          <BasketButton key='basket-home' navigation={navigation} isWhite={white} />
+          <AddButton key='chat-categories' navigation={navigation} />,
         ]);
       case 'Deals':
         return ([
@@ -81,11 +91,7 @@ class Header extends React.Component {
           <BellButton key='chat-deals' navigation={navigation} isWhite={white} />,
           <BasketButton key='basket-deals' navigation={navigation} isWhite={white} />
         ]);
-      case 'Profile':
-        return ([
-          <BellButton key='chat-profile' navigation={navigation} isWhite={white} />,
-          <BasketButton key='basket-deals' navigation={navigation} isWhite={white} />
-        ]);
+      
       case 'Product':
         return ([
           <SearchButton key='search-product' navigation={navigation} isWhite={white} />,
@@ -132,7 +138,7 @@ class Header extends React.Component {
         </Button>
         <Button shadowless style={styles.tab} onPress={() => navigation.navigate('Pro')}>
           <Block row middle>
-            <Icon size={16} name="bag-17" family="ArgonExtra" style={{ paddingRight: 8 }} color={argonTheme.COLORS.ICON}/>
+            <Icon size={16} name="switches" family="ArgonExtra" style={{ paddingRight: 8 }} color={argonTheme.COLORS.ICON}/>
             <Text size={16} style={styles.tabTitle}>{optionRight || 'Fashion'}</Text>
           </Block>
         </Button>
