@@ -10,9 +10,6 @@ import {
 
 const stripePromise = loadStripe('STRIPE_PUBLISHABLE_API_KEY');
 
-
-
-
 export default function CheckoutForm(props) {
 
     const stripe = useStripe();
@@ -42,17 +39,10 @@ export default function CheckoutForm(props) {
             card: cardElement,
         });
 
-        if (error) {
-            console.log('[error]', error);
-        } else {
-            
-            props.checkout({ paymentMethod: paymentMethod, method: 'stripe', loaderDismisser: dismissLoader});
-            console.log('[PaymentMethod]', paymentMethod);
-        }
     };
 
     return (
-        <Elements stripe={stripePromise}>
+        
             <CardElement
                 options={{
                     style: {
@@ -69,7 +59,7 @@ export default function CheckoutForm(props) {
                     },
                 }}
             />      
-        </Elements>
+        
     );
 };
 

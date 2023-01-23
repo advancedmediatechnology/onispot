@@ -25,6 +25,8 @@ import WebhookPaymentScreen from "../screens/CheckoutForm";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
+import CheckoutForm from "../screens/CheckoutForm";
+import CheckoutFormWrapper from "../screens/CheckoutFormWrapper";
 
 const { width } = Dimensions.get("screen");
 
@@ -159,7 +161,7 @@ function ProfileStack(props) {
 
 function HomeStack(props) {
   return (
-    <Stack.Navigator screenOptions={{mode: "card", headerShown: "screen",}} >
+    <Stack.Navigator screenOptions={{ mode: "card", headerShown: "screen" }}>
       <Stack.Screen
         name="HomeInt"
         component={Home}
@@ -271,6 +273,23 @@ function HomeStack(props) {
               navigation={navigation}
               scene={scene}
               tabIndex={0}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="CheckoutForm"
+        component={CheckoutFormWrapper}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Checkout"
+              search
+              back
+              options
+              navigation={navigation}
+              scene={scene}
             />
           ),
           cardStyle: { backgroundColor: "#F8F9FE" },

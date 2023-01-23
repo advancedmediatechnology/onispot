@@ -71,7 +71,7 @@ export default props => {
     return (
       <StripeProvider
           publishableKey="pk_test_XUIpXpyaGuuw0Dc9Ng80xFWs"
-          urlScheme="your-url-scheme" // required for 3D Secure and bank redirects
+          //urlScheme="your-url-scheme" // required for 3D Secure and bank redirects
           //merchantIdentifier="merchant.com.{{YOUR_APP_NAME}}" // required for Apple Pay
       >
         <NavigationContainer>

@@ -48,30 +48,44 @@ class Home extends React.Component {
     return (
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.articles}>
+        contentContainerStyle={styles.articles}
+      >
         <Block flex>
-        {campaigns &&
-                campaigns.map((item, index) =>
-                <Block style={{marginVertical:5,marginHorizontal:30}} key={item._id}>
+          {campaigns &&
+            campaigns.map((item, index) => (
+              <Block
+                style={{ marginVertical: 5, marginHorizontal: 30 }}
+                key={item._id}
+              >
                 <Button
-                   
-                    onPress={() => navigation.navigate("Newcampaign",{campaign:item._id})}
-                    color={argonTheme.COLORS.PRIMARY}
+                  onPress={() =>
+                    navigation.navigate("Newcampaign", { campaign: item._id })
+                  }
+                  color={argonTheme.COLORS.PRIMARY}
                 />
                 <Text>{item.name}</Text>
               </Block>
-                )
-              }
-          <Card item={articles[0]} horizontal  />
+            ))}
+          <Button
+            onPress={() =>
+              navigation.navigate("CheckoutForm", { })
+            }
+          >
+            <Text>Stripe</Text>
+          </Button>
+          <Card item={articles[0]} horizontal />
           <Block flex row>
-            <Card item={articles[1]} style={{ marginRight: theme.SIZES.BASE }} />
+            <Card
+              item={articles[1]}
+              style={{ marginRight: theme.SIZES.BASE }}
+            />
             <Card item={articles[2]} />
           </Block>
           <Card item={articles[3]} horizontal />
           <Card item={articles[4]} full />
         </Block>
       </ScrollView>
-    )
+    );
   }
 
   render() {
