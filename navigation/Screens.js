@@ -262,32 +262,13 @@ function HomeStack(props) {
         }}
       />
       <Stack.Screen
-        name="CampaignPayment"
-        component={WebhookPaymentScreen}
-        options={{
-          header: ({ navigation, scene }) => (
-            <Header
-              title="Campaign Payment"
-              back
-              transparent
-              navigation={navigation}
-              scene={scene}
-              tabIndex={0}
-            />
-          ),
-          cardStyle: { backgroundColor: "#F8F9FE" },
-        }}
-      />
-      <Stack.Screen
         name="CheckoutForm"
         component={CheckoutFormWrapper}
         options={{
           header: ({ navigation, scene }) => (
             <Header
               title="Checkout"
-              search
               back
-              options
               navigation={navigation}
               scene={scene}
             />

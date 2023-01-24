@@ -3,7 +3,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-
+import { CardField, useStripe } from "@stripe/stripe-react-native";
 
 import {
   StyleSheet,
@@ -21,8 +21,6 @@ import {
 import { Block, Checkbox, Button, Text, theme } from "galio-framework";
 import { Input, Icon,  DrawerItem as DrawerCustomItem } from "../components";
 import { LinearGradient } from 'expo-linear-gradient';
-import Slider from '@react-native-community/slider';
-import SegmentedControl from '@react-native-segmented-control/segmented-control';
 const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
@@ -127,9 +125,9 @@ class CampaignAudience extends React.Component {
         this.updateCampaign();
     }
 
-    goHome() {
+    goPay() {
         const { navigation } = this.props;
-        navigation.navigate('CampaignPayment');
+        navigation.navigate('CheckoutForm');
     }
 
     /* update interfaces */
@@ -188,7 +186,15 @@ class CampaignAudience extends React.Component {
             <Block style={{marginBottom:40}}>
                 <Text h4>Audience: {audience}</Text>
             </Block>
-            
+            <View  center style={{marginTop:30}}>
+            <CardField
+              postalCodeEnabled={false}
+              style={styles.cardField}
+              onCardChange={(cardDetails) => {
+                console.log("cardDetails", cardDetails);
+              }}
+            />
+            </View>
             <Block  center>
                 {isLoading  ? <ActivityIndicator/> : (
                     <LinearGradient colors={['#66FCF1',  '#46BAB8']}
@@ -198,10 +204,10 @@ class CampaignAudience extends React.Component {
                         style={styles.button}
                         color='transparent'
                         padding='0 0 0 0'
-                        onPress={() => this.goHome()}
+                        onPress={() => this.goPay()}
                         textStyle={{ color: argonTheme.COLORS.WHITE, fontWeight: '500'  }}
                     >
-                        PAY
+                        NEXT
                     </Button>
                     </LinearGradient>
                 )}
@@ -239,6 +245,11 @@ const styles = StyleSheet.create({
     paddingRight:16,
     borderColor: argonTheme.COLORS.BORDER,
     backgroundColor: '#F7FAFC'
+  },
+  cardField: {
+    width: "100%",
+    height: 50,
+    marginVertical: 30,
   },
   inputError: {
     borderRadius: 4,
