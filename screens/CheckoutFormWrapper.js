@@ -1,168 +1,398 @@
 import React, {useState, useEffect } from 'react';
-import { CardField, useStripe, useConfirmPayment } from "@stripe/stripe-react-native";
+import {
+  CardField,
+  useStripe,
+  useConfirmPayment,
+  initStripe,
+} from "@stripe/stripe-react-native";
 import * as SecureStore from 'expo-secure-store';
-import { Block, Checkbox, Button, Text, theme } from "galio-framework";
-import { StyleSheet, View, Dimensions} from 'react-native';
+import { Block, Checkbox, theme } from "galio-framework";
+import GooglePayMark from "./GooglePayMark";
+import ApplePayMark from "./ApplePayMark";
+import {
+  Dimensions,
+  StyleSheet,
+  Button,
+  View,
+  Text,
+  Pressable,
+  Platform,
+} from "react-native";
+
 import { LinearGradient } from 'expo-linear-gradient';
 const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
 
 
+const ProductRow = ({ product, cart, setCart }) => {
+  const modifyCart = (delta) => {
+    setCart({ ...cart, [product.id]: cart[product.id] + delta });
+  };
+  return (
+    <View style={styles.productRow}>
+      <View style={{ flexDirection: "row" }}>
+        <Text style={{ fontSize: 17, flexGrow: 1 }}>
+          {product.name} - {product.price}$
+        </Text>
+        <Text style={{ fontSize: 17, fontWeight: "700" }}>
+          {cart[product.id]}
+        </Text>
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginTop: 8,
+        }}
+      >
+        <Button
+          disabled={cart[product.id] <= 0}
+          title="Remove"
+          onPress={() => modifyCart(-1)}
+        />
+        <Button title="Add" onPress={() => modifyCart(1)} />
+      </View>
+    </View>
+  );
+};
 
+const ProductsScreen = ({ products, navigateToCheckout }) => {
+  /**
+   * We will save the state of the cart here
+   * It will have the inital shape:
+   * {
+   *  [product.id]: 0
+   * }
+   */
+  const [cart, setCart] = React.useState(
+    Object.fromEntries(products.map((p) => [p.id, 0]))
+  );
 
-
-
-
-export default function CheckoutFormWrapper(props) {
-  const {confirmPayment, loading} = useConfirmPayment();
-  const [token, setToken] = useState([]);
-
-  const getToken = async () => {
-    await SecureStore.getItemAsync('secure_token').then(t =>{
-        this.setState({token:t})
-    });
-  }
-
-  useEffect(() => {
-    const token = SecureStore.getItemAsync('secure_token').then(t =>{
-      if (t) {
-        setToken(t);
-      }
-    });
-  }, []);
-
-  const fetchPaymentIntentClientSecret = async () => {
-    const response = await fetch('http://test.onispot.com/api/user/new-payment-intent', {
-      method: 'POST',
+  const handleContinuePress = async () => {
+    /* Send the cart to the server */
+    const URL = "http://test.onispot.com/api/new-payment-intent/?amount=10";
+    const response = await fetch(URL, {
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
+        "Content-Type": "application-json",
       },
-      body: JSON.stringify({
-        currency: 'usd',
-        amount:'1'
-      }),
     });
-    const {clientSecret} = await response.json();
 
-    return clientSecret;
+    /* Await the response */
+    const { publishableKey, clientSecret, merchantName } =
+      await response.json();
+
+    /* Navigate to the CheckoutScreen */
+    /* You can use navigation.navigate from react-navigation */
+    navigateToCheckout({
+      publishableKey,
+      clientSecret,
+      merchantName,
+      cart,
+      products,
+    });
   };
 
-  const handlePayPress = async () => {
-    // Gather the customer's billing information (for example, email)
-    const billingDetails = {
-      email: 'jenny.rosen@example.com',
-    };
+  return (
+    <View style={styles.screen}>
+      {products.map((p) => {
+        return (
+          <ProductRow key={p.id} product={p} cart={cart} setCart={setCart} />
+        );
+      })}
+      <View style={{ marginTop: 16 }}>
+        <Button title="Continue" onPress={handleContinuePress} />
+      </View>
+    </View>
+  );
+};
 
-    // Fetch the intent client secret from the backend
-    const clientSecret = await fetchPaymentIntentClientSecret();
+/**
+ * CheckoutScreen related components
+ */
 
-    // Confirm the payment with the card details
-    const {paymentIntent, error} = await confirmPayment(clientSecret, {
-      paymentMethodType: 'Card',
-      paymentMethodData: {
-        billingDetails,
-      },
+const CartInfo = ({ products, cart }) => {
+  return (
+    <View>
+      {Object.keys(cart).map((productId) => {
+        const product = products.filter((p) => p.id === productId)[0];
+        const quantity = cart[productId];
+        return (
+          <View
+            key={productId}
+            style={[{ flexDirection: "row" }, styles.productRow]}
+          >
+            <Text style={{ flexGrow: 1, fontSize: 17 }}>
+              {quantity} x {product.name}
+            </Text>
+            <Text style={{ fontWeight: "700", fontSize: 17 }}>
+              {quantity * product.price}$
+            </Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+};
+
+const MethodSelector = ({ onPress, paymentMethod }) => {
+  // ...
+  return (
+    <View style={{ marginVertical: 48, width: "75%" }}>
+      <Text
+        style={{
+          fontSize: 14,
+          letterSpacing: 1.5,
+          color: "black",
+          textTransform: "uppercase",
+        }}
+      >
+        Select payment method
+      </Text>
+      {/* If there's no paymentMethod selected, show the options */}
+
+
+      
+      {!paymentMethod && (
+        <Pressable
+          onPress={onPress}
+          style={{
+            flexDirection: "row",
+            paddingVertical: 8,
+            alignItems: "center",
+          }}
+        >
+
+          <View style={[styles.selectButton, { marginLeft: 16 }]}>
+            <Text style={[styles.boldText, { color: "#007DFF" }]}>Card</Text>
+          </View>
+        </Pressable>
+      )}
+
+
+
+
+      {/* If there's a paymentMethod selected, show it */}
+      {!!paymentMethod && (
+        <Pressable
+          onPress={onPress}
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingVertical: 8,
+          }}
+        >
+          {paymentMethod.label.toLowerCase().includes("apple") && (
+            <ApplePayMark height={59} />
+          )}
+          {paymentMethod.label.toLowerCase().includes("google") && (
+            <GooglePayMark height={59} />
+          )}
+          {!paymentMethod.label.toLowerCase().includes("google") &&
+            !paymentMethod.label.toLowerCase().includes("apple") && (
+              <View style={[styles.selectButton, { marginRight: 16 }]}>
+                <Text style={[styles.boldText, { color: "#007DFF" }]}>
+                  {paymentMethod.label}
+                </Text>
+              </View>
+            )}
+          <Text style={[styles.boldText, { color: "#007DFF", flex: 1 }]}>
+            Change payment method
+          </Text>
+        </Pressable>
+      )}
+    </View>
+  );
+};
+
+const CheckoutScreen = ({
+  products,
+  navigateBack,
+  publishableKey,
+  clientSecret,
+  merchantName,
+  cart,
+}) => {
+  // We will store the selected paymentMethod
+  const [paymentMethod, setPaymentMethod] = React.useState();
+
+  // Import some stripe functions
+  const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } =
+    useStripe();
+
+  // Initialize stripe values upon mounting the screen
+  React.useEffect(() => {
+    (async () => {
+      await initStripe({
+        publishableKey,
+        // Only if implementing applePay
+        // Set the merchantIdentifier to the same
+        // value in the StripeProvider and
+        // striple plugin in app.json
+        merchantIdentifier: "yourMerchantIdentifier",
+      });
+
+      // Initialize the PaymentSheet with the paymentIntent data,
+      // we will later present and confirm this
+      await initializePaymentSheet();
+    })();
+  }, []);
+
+  const initializePaymentSheet = async () => {
+    const { error, paymentOption } = await initPaymentSheet({
+      paymentIntentClientSecret: clientSecret,
+      customFlow: true,
+      merchantDisplayName: merchantName,
+      style: "alwaysDark", // If darkMode
+      googlePay: true, // If implementing googlePay
+      applePay: true, // If implementing applePay
+      merchantCountryCode: "ES", // Countrycode of the merchant
+      testEnv: __DEV__, // Set this flag if it's a test environment
     });
-
     if (error) {
-      console.log('Payment confirmation error', error);
-    } else if (paymentIntent) {
-      console.log('Success from promise', paymentIntent);
+      console.log(error);
+    } else {
+      // Upon initializing if there's a paymentOption
+      // of choice it will be filled by default
+      setPaymentMethod(paymentOption);
     }
   };
 
-  const getCampaign = async(campaign) => {
-    try {
-        apiClient.get('campaign/'+campaign, 
-        { },
-        { headers: {Authorization: 'Bearer ' + this.state.token}})
-        .then(r => {
-            this.setState({objcampaign:r.data, budget:r.data.budget});
-            this.getAudience(campaign)
-        }).catch(e => { 
-            console.log(e);
-        }).finally(()=>{});
-    } catch(error) {
-        console.log(error);
-    };
-}
+  const handleSelectMethod = async () => {
+    const { error, paymentOption } = await presentPaymentSheet({
+      confirmPayment: false,
+    });
+    if (error) {
+      alert(`Error code: ${error.code}`, error.message);
+    }
+    setPaymentMethod(paymentOption);
+  };
+
+  const handleBuyPress = async () => {
+    if (paymentMethod) {
+      const response = await confirmPaymentSheetPayment();
+
+      if (response.error) {
+        alert(`Error ${response.error.code}`);
+        console.error(response.error.message);
+      } else {
+        alert("Purchase completed!");
+      }
+    }
+  };
+
+  return (
+    <View>
+      <MethodSelector
+        onPress={handleSelectMethod}
+        paymentMethod={paymentMethod}
+      />
+      
+      <Button title="Buy" onPress={() =>handleBuyPress()}></Button>
+
+    </View>
+  );
+};
+
+const AppContent = () => {
+  const products = [
+    {
+      price: 10,
+      name: "Pizza Pepperoni",
+      id: "pizza-pepperoni",
+    },
+    {
+      price: 12,
+      name: "Pizza 4 Fromaggi",
+      id: "pizza-fromaggi",
+    },
+    {
+      price: 8,
+      name: "Pizza BBQ",
+      id: "pizza-bbq",
+    },
+  ];
+
+  const [screenProps, setScreenProps] = React.useState(null);
+
+  const navigateToCheckout = (screenProps) => {
+    setScreenProps(screenProps);
+  };
+
+  const navigateBack = () => {
+    setScreenProps(null);
+  };
+
+  return (
+    <View style={styles.container}>
+      {!screenProps && (
+        <ProductsScreen
+          products={products}
+          navigateToCheckout={navigateToCheckout}
+        />
+      )}
+      {!!screenProps && (
+        <CheckoutScreen {...screenProps} navigateBack={navigateBack} />
+      )}
+    </View>
+  );
+};
 
 
+export default function CheckoutFormWrapper(props) {
     return (
       <Block flex style={styles.container}>
         <Block space="between" style={styles.padded}>
-        <Text center h5>Proceed to payment</Text>
-          <View  center style={{marginTop:30}}>
-            <CardField
-              postalCodeEnabled={false}
-              style={styles.cardField}
-              onCardChange={(cardDetails) => {
-                console.log("cardDetails", cardDetails);
-              }}
-            />
-            </View>
-            <Block  center>
-               
-                    <LinearGradient colors={['#66FCF1',  '#46BAB8']}
-                    style={{borderRadius: 30}} 
-                    start={{ y: 0.0, x: 0.0 }} end={{ y: 0.0, x: 1.1 }}>
-                    <Button
-                        style={styles.button}
-                        color='transparent'
-                        padding='0 0 0 0'
-                        onPress={handlePayPress}
-                        disabled={loading} 
-                        textStyle={{ color: argonTheme.COLORS.WHITE, fontWeight: '500'  }}
-                    >
-                        PAY
-                    </Button>
-                    </LinearGradient>
-            </Block>
-          </Block>
+          <Text center h5>
+            Proceed to payment
+          </Text>
+          <AppContent />
+        </Block>
       </Block>
     );
 } 
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.COLORS.WHITE
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  padded: {
-    paddingTop:30,
-    paddingHorizontal: theme.SIZES.BASE,
-    position: "relative",
-    bottom: theme.SIZES.BASE,
-    zIndex: 2,
+  screen: {
+    alignSelf: "stretch",
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  cardField: {
-    width: "100%",
-    height: 50,
-    marginVertical: 30,
+  productRow: {
+    paddingVertical: 24,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    width: "75%",
   },
-  emailField: {
-    borderWidth: 1,
-    borderColor: "lightgrey",
-    borderRadius: 6,
-    marginVertical: 8,
+  buyButton: {
+    backgroundColor: "#007DFF",
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 8,
   },
-  buttonContainer: {
-    marginTop: 20,
+  textButton: {
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 8,
+    color: "#007DFF",
   },
-  button: {
-    width: width - theme.SIZES.BASE * 4,
-    height: theme.SIZES.BASE * 3,
-    shadowRadius: 0,
-    shadowOpacity: 0,
-    borderRadius: 30,
-    marginTop: 0,
-    marginBottom: 0,
-    marginRight: 0,
-    marginLeft: 0,
+  selectButton: {
+    borderColor: "#007DFF",
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 8,
+    borderWidth: 2,
   },
-  input: {
-    height: 44,
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1.5,
+  boldText: {
+    fontSize: 17,
+    fontWeight: "700",
   },
 });
