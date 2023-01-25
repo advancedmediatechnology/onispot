@@ -21,11 +21,9 @@ import CampaignCreativity from "../screens/CampaignCreativity";
 import CampaignPrefs from "../screens/CampaignPrefs";
 import CampaignTarget from "../screens/CampaignTarget";
 import CampaignAudience from "../screens/CampaignAudience";
-import WebhookPaymentScreen from "../screens/CheckoutForm";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
-import CheckoutForm from "../screens/CheckoutForm";
 import CheckoutFormWrapper from "../screens/CheckoutFormWrapper";
 
 const { width } = Dimensions.get("screen");

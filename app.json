@@ -1,12 +1,11 @@
 {
   "expo": {
-   "plugins": [
+    "plugins": [
       [
         "expo-image-picker",
         {
           "photosPermission": "custom photos permission",
           "cameraPermission": "Allow $(PRODUCT_NAME) to open the camera",
-
           "//": "Disables the microphone permission",
           "microphonePermission": false
         }
@@ -17,7 +16,21 @@
           "merchantIdentifier": "",
           "enableGooglePay": false
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 31,
+            "targetSdkVersion": 31,
+            "buildToolsVersion": "31.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "13.0"
+          }
+        }
       ]
+      
     ],
     "name": "Argon FREE React Native",
     "slug": "onispot",
@@ -41,7 +54,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.simsasso.onispot"
     },
     "description": "Argon React Native, based on Argon Design System. Coded by Creative Tim",
     "extra": {
@@ -49,6 +63,9 @@
         "projectId": "912acdf1-93d5-4471-8c8a-5417783d3dbc"
       }
     },
-    "owner": "simsasso"
+    "owner": "simsasso",
+    "android": {
+      "package": "com.simsasso.onispot"
+    }
   }
 }
