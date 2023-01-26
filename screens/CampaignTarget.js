@@ -87,7 +87,6 @@ class CampaignTarget extends React.Component {
         .then(r => {
             this.setState({isLoading: false});
             if (r.data.status === 1) {
-                console.log(r.data);
                 navigation.navigate("CampaignAudience", { campaign: r.data.campaign._id });
             } else {
                 alert('unsuccessufull');

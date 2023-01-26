@@ -42,6 +42,12 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
+const numberFormat = (value) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+}).format(value);
+
 class Articles extends React.Component {
   constructor(props) {
     super(props);
@@ -94,7 +100,7 @@ class Articles extends React.Component {
               color={theme.COLORS.MUTED}
               style={styles.productPrice}
             >
-              {item.budget}
+              {numberFormat(item.budget)}
             </Text>
             <Text center size={34}>
               {item.name}
@@ -117,9 +123,7 @@ class Articles extends React.Component {
     const {campaigns} = this.state;
     return (
       <Block flex style={styles.group}>
-        <Text bold size={16} style={styles.title}>
-          Cards
-        </Text>
+       
         <Block flex>
          {/* <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
             <Card item={articles[0]} horizontal />

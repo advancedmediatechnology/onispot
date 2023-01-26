@@ -3,7 +3,6 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { CardField, useStripe } from "@stripe/stripe-react-native";
 
 import {
   StyleSheet,
@@ -17,6 +16,7 @@ import {
   ActivityIndicator,
   TextInput,
   TouchableOpacity,
+  Keyboard,
 } from "react-native";
 import { Block, Checkbox, Button, Text, theme } from "galio-framework";
 import { Input, Icon,  DrawerItem as DrawerCustomItem } from "../components";
@@ -25,12 +25,18 @@ const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
 
-
+const numberFormat = (value) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+}).format(value);
 
 const apiClient = axios.create({
   baseURL: 'http://test.onispot.com/api/' ,
   withCredentials: true,
 });
+
+
 
 class CampaignAudience extends React.Component {
 
@@ -73,18 +79,17 @@ class CampaignAudience extends React.Component {
         };
     }
 
-    async updateCampaign() {
+    async updateCampaign(abudget) {
         const { navigation } = this.props;
         this.setState({isLoading: true});
         var id = (this.state.campaign) ? '/'+ this.state.campaign : '';
         apiClient.post('campaign'+id, { 
-            budget:this.state.budget,
+            budget:abudget,
         },
         { headers: {Authorization: 'Bearer ' + this.state.token}})
         .then(r => {
             this.setState({isLoading: false});
             if (r.data.status === 1) {
-                console.log(r.data);
                 this.getAudience(this.state.campaign)
             } else {
                 alert('unsuccessufull');
@@ -122,12 +127,12 @@ class CampaignAudience extends React.Component {
 
     setOperationBudget(abudget) {
         this.setState({ budget:abudget });
-        this.updateCampaign();
+        this.updateCampaign(abudget);
     }
 
     goPay() {
         const { navigation } = this.props;
-        navigation.navigate('CheckoutForm');
+        navigation.navigate('CheckoutForm', { campaign: this.state.campaign });
     }
 
     /* update interfaces */
@@ -174,8 +179,9 @@ class CampaignAudience extends React.Component {
                 <Input
                     label='Budget'
                     family='Foundation'
-                    icon='dollar-bill'
-                    iconSize={40}
+                    icon='dollar'
+                    iconSize={30}
+                    type='number-pad'
                     value={this.state.budget}
                     onChange={(e) => this.setOperationBudget(e.nativeEvent.text)}
                     error={this.state.errorbudget}
@@ -186,15 +192,6 @@ class CampaignAudience extends React.Component {
             <Block style={{marginBottom:40}}>
                 <Text h4>Audience: {audience}</Text>
             </Block>
-            <View  center style={{marginTop:30}}>
-            <CardField
-              postalCodeEnabled={false}
-              style={styles.cardField}
-              onCardChange={(cardDetails) => {
-                console.log("cardDetails", cardDetails);
-              }}
-            />
-            </View>
             <Block  center>
                 {isLoading  ? <ActivityIndicator/> : (
                     <LinearGradient colors={['#66FCF1',  '#46BAB8']}
@@ -245,11 +242,6 @@ const styles = StyleSheet.create({
     paddingRight:16,
     borderColor: argonTheme.COLORS.BORDER,
     backgroundColor: '#F7FAFC'
-  },
-  cardField: {
-    width: "100%",
-    height: 50,
-    marginVertical: 30,
   },
   inputError: {
     borderRadius: 4,

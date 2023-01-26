@@ -1,4 +1,5 @@
 import React, {useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   CardField,
   useStripe,
@@ -6,15 +7,12 @@ import {
   initStripe,
 } from "@stripe/stripe-react-native";
 import * as SecureStore from 'expo-secure-store';
-import { Block, Checkbox, theme } from "galio-framework";
-import GooglePayMark from "./GooglePayMark";
-import ApplePayMark from "./ApplePayMark";
+import { Block, Checkbox, theme, Text,  Button } from "galio-framework";
 import {
   Dimensions,
   StyleSheet,
-  Button,
+  
   View,
-  Text,
   Pressable,
   Platform,
 } from "react-native";
@@ -23,54 +21,44 @@ import { LinearGradient } from 'expo-linear-gradient';
 const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
 
+const numberFormat = (value) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+}).format(value);
 
-const ProductRow = ({ product, cart, setCart }) => {
-  const modifyCart = (delta) => {
-    setCart({ ...cart, [product.id]: cart[product.id] + delta });
-  };
-  return (
-    <View style={styles.productRow}>
-      <View style={{ flexDirection: "row" }}>
-        <Text style={{ fontSize: 17, flexGrow: 1 }}>
-          {product.name} - {product.price}$
-        </Text>
-        <Text style={{ fontSize: 17, fontWeight: "700" }}>
-          {cart[product.id]}
-        </Text>
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          marginTop: 8,
-        }}
-      >
-        <Button
-          disabled={cart[product.id] <= 0}
-          title="Remove"
-          onPress={() => modifyCart(-1)}
-        />
-        <Button title="Add" onPress={() => modifyCart(1)} />
-      </View>
-    </View>
-  );
-};
+const apiClient = axios.create({
+  baseURL: 'http://test.onispot.com/api/' ,
+  withCredentials: true,
+});
 
-const ProductsScreen = ({ products, navigateToCheckout }) => {
-  /**
-   * We will save the state of the cart here
-   * It will have the inital shape:
-   * {
-   *  [product.id]: 0
-   * }
-   */
-  const [cart, setCart] = React.useState(
-    Object.fromEntries(products.map((p) => [p.id, 0]))
-  );
+const ProductsScreen = ({ campaign_id, navigateToCheckout }) => {
+  const [campaignrobuy, setCampaignrobuy] = React.useState(null);
+
+  React.useEffect(() => {
+    (async () => {
+      await SecureStore.getItemAsync('secure_token').then(t =>{
+        try {
+          apiClient.get('campaign/'+campaign_id, 
+          { },
+          { headers: {Authorization: 'Bearer ' + t}})
+          .then(r => {
+            setCampaignrobuy(r.data);
+          }).catch(e => { 
+              console.log(e);
+          }).finally(()=>{});
+        } catch(error) {
+            console.log(error);
+        };
+      });
+    })();
+  }, [campaign_id]);
+
+  
 
   const handleContinuePress = async () => {
     /* Send the cart to the server */
-    const URL = "http://test.onispot.com/api/new-payment-intent/?amount=10";
+    const URL = "http://test.onispot.com/api/new-payment-intent/?amount="+campaignrobuy.budget+"&campaign_id="+campaignrobuy._id;
     const response = await fetch(URL, {
       method: "GET",
       headers: {
@@ -88,22 +76,34 @@ const ProductsScreen = ({ products, navigateToCheckout }) => {
       publishableKey,
       clientSecret,
       merchantName,
-      cart,
-      products,
+      campaignrobuy,
     });
   };
 
+  
+
   return (
-    <View style={styles.screen}>
-      {products.map((p) => {
-        return (
-          <ProductRow key={p.id} product={p} cart={cart} setCart={setCart} />
-        );
-      })}
-      <View style={{ marginTop: 16 }}>
-        <Button title="Continue" onPress={handleContinuePress} />
-      </View>
-    </View>
+    <Block center>
+      {campaignrobuy && (
+        <Block>
+          <Text style={{fontSize:15, marginTop:20}}>Campaign name: {campaignrobuy.name}</Text>
+          <Text style={{fontSize:15, marginTop:10}}>Campaign budget: {numberFormat(campaignrobuy.budget)}</Text>
+        </Block>
+      )}
+      <Block style={{ marginTop: 40 }}>
+      <LinearGradient colors={['#66FCF1',  '#46BAB8']}
+                    style={{borderRadius: 30}} 
+                    start={{ y: 0.0, x: 0.0 }} end={{ y: 0.0, x: 1.1 }}>
+          <Button style={styles.button}
+            color='transparent'
+            textStyle={{ color: argonTheme.COLORS.WHITE, fontWeight: '500'  }}
+            padding='0 0 0 0' 
+            onPress={handleContinuePress} >
+              CONTINUE
+          </Button>
+        </LinearGradient>
+      </Block>
+    </Block>
   );
 };
 
@@ -111,42 +111,11 @@ const ProductsScreen = ({ products, navigateToCheckout }) => {
  * CheckoutScreen related components
  */
 
-const CartInfo = ({ products, cart }) => {
-  return (
-    <View>
-      {Object.keys(cart).map((productId) => {
-        const product = products.filter((p) => p.id === productId)[0];
-        const quantity = cart[productId];
-        return (
-          <View
-            key={productId}
-            style={[{ flexDirection: "row" }, styles.productRow]}
-          >
-            <Text style={{ flexGrow: 1, fontSize: 17 }}>
-              {quantity} x {product.name}
-            </Text>
-            <Text style={{ fontWeight: "700", fontSize: 17 }}>
-              {quantity * product.price}$
-            </Text>
-          </View>
-        );
-      })}
-    </View>
-  );
-};
-
 const MethodSelector = ({ onPress, paymentMethod }) => {
   // ...
   return (
-    <View style={{ marginVertical: 48, width: "75%" }}>
-      <Text
-        style={{
-          fontSize: 14,
-          letterSpacing: 1.5,
-          color: "black",
-          textTransform: "uppercase",
-        }}
-      >
+    <View style={{ marginTop:10 }}>
+      <Text center style={{ fontSize:14, fontWeight: '500', marginBottom:20  }}>
         Select payment method
       </Text>
       {/* If there's no paymentMethod selected, show the options */}
@@ -183,12 +152,7 @@ const MethodSelector = ({ onPress, paymentMethod }) => {
             paddingVertical: 8,
           }}
         >
-          {paymentMethod.label.toLowerCase().includes("apple") && (
-            <ApplePayMark height={59} />
-          )}
-          {paymentMethod.label.toLowerCase().includes("google") && (
-            <GooglePayMark height={59} />
-          )}
+          
           {!paymentMethod.label.toLowerCase().includes("google") &&
             !paymentMethod.label.toLowerCase().includes("apple") && (
               <View style={[styles.selectButton, { marginRight: 16 }]}>
@@ -207,12 +171,11 @@ const MethodSelector = ({ onPress, paymentMethod }) => {
 };
 
 const CheckoutScreen = ({
-  products,
   navigateBack,
   publishableKey,
   clientSecret,
+  campaignrobuy,
   merchantName,
-  cart,
 }) => {
   // We will store the selected paymentMethod
   const [paymentMethod, setPaymentMethod] = React.useState();
@@ -284,36 +247,34 @@ const CheckoutScreen = ({
 
   return (
     <View>
+      {campaignrobuy && (
+        <Block center>
+          <Block style={{fontSize:15, marginBottom:20}}>
+            <Text style={{fontSize:15, marginTop:20}}>Campaign name: {campaignrobuy.name}</Text>
+            <Text style={{fontSize:15, marginTop:10}}>Campaign budget: {numberFormat(campaignrobuy.budget)}</Text>
+          </Block>
+        </Block>
+      )}
       <MethodSelector
         onPress={handleSelectMethod}
         paymentMethod={paymentMethod}
       />
-      
-      <Button title="Buy" onPress={() =>handleBuyPress()}></Button>
-
+      <LinearGradient colors={['#66FCF1',  '#46BAB8']}
+                    style={{borderRadius: 30, marginTop:20}} 
+                    start={{ y: 0.0, x: 0.0 }} end={{ y: 0.0, x: 1.1 }}>
+      <Button
+        style={styles.button}
+        color='transparent'
+        textStyle={{ color: argonTheme.COLORS.WHITE, fontWeight: '500'  }}
+        padding='0 0 0 0' onPress={() =>handleBuyPress()}>
+          PAY
+       </Button>
+      </LinearGradient>
     </View>
   );
 };
 
-const AppContent = () => {
-  const products = [
-    {
-      price: 10,
-      name: "Pizza Pepperoni",
-      id: "pizza-pepperoni",
-    },
-    {
-      price: 12,
-      name: "Pizza 4 Fromaggi",
-      id: "pizza-fromaggi",
-    },
-    {
-      price: 8,
-      name: "Pizza BBQ",
-      id: "pizza-bbq",
-    },
-  ];
-
+const AppContent = (props) => {
   const [screenProps, setScreenProps] = React.useState(null);
 
   const navigateToCheckout = (screenProps) => {
@@ -325,29 +286,34 @@ const AppContent = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {!screenProps && (
-        <ProductsScreen
-          products={products}
-          navigateToCheckout={navigateToCheckout}
-        />
-      )}
+    <Block>
+        {!screenProps  && (
+          <ProductsScreen
+            campaign_id={props.campaign_id}
+            navigateToCheckout={navigateToCheckout}
+          />
+        )}
       {!!screenProps && (
         <CheckoutScreen {...screenProps} navigateBack={navigateBack} />
       )}
-    </View>
+     
+    </Block>
   );
 };
 
 
+
+
+
 export default function CheckoutFormWrapper(props) {
+    
     return (
-      <Block flex style={styles.container}>
+      <Block  style={styles.container}>
         <Block space="between" style={styles.padded}>
-          <Text center h5>
+          <Text center h5 style={{marginTop:20}}>
             Proceed to payment
           </Text>
-          <AppContent />
+          <AppContent campaign_id={props.route.params.campaign}/>
         </Block>
       </Block>
     );
@@ -355,7 +321,6 @@ export default function CheckoutFormWrapper(props) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
@@ -394,5 +359,16 @@ const styles = StyleSheet.create({
   boldText: {
     fontSize: 17,
     fontWeight: "700",
+  },
+  button: {
+    width: width - theme.SIZES.BASE * 4,
+    height: theme.SIZES.BASE * 3,
+    shadowRadius: 0,
+    shadowOpacity: 0,
+    borderRadius: 30,
+    marginTop: 0,
+    marginBottom: 0,
+    marginRight: 0,
+    marginLeft: 0,
   },
 });

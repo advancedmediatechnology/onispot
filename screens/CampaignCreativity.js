@@ -92,7 +92,6 @@ class CampaignCreativity extends React.Component {
     .then(r => {
       this.setState({isLoading: false});
       if (r.data.status === 1) {
-        console.log(r.data);
         navigation.navigate("CampaignPrefs", { campaign: r.data.campaign._id });
       } else {
         alert('unsuccessufull');
