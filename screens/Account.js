@@ -18,6 +18,8 @@ const { height, width } = Dimensions.get("screen");
 import prefs from "../constants/preferences"
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import SegmentedControl from '@react-native-segmented-control/segmented-control';
 
 
 const apiClient = axios.create({
@@ -35,6 +37,8 @@ class Account extends React.Component {
       password: '',
       errorpass:false,
       name:'',
+      birthdate:null,
+      gender:null,
       errorname:false,
       repassword: '',
       errorrepass:false,
@@ -76,14 +80,15 @@ class Account extends React.Component {
       return
     }
     this.setState({isLoading: true});
-    apiClient.post('update', { 
-      name
-    })
+    apiClient.post('/user/update', 
+    { 
+      name,
+      birthdate:this.state.birthdate,
+      gender:this.state.gender
+    },
+    { headers: {Authorization: 'Bearer ' + this.state.token}})
     .then(r => {
-      console.log(r);
-      //this.setState({token: r.data.token});
-      //SecureStore.setItemAsync('secure_token',r.data.token);
-      //this.setState({isLoading: false});
+      console.log(r.data);
       
     })
     .catch(e => { 
@@ -142,7 +147,13 @@ class Account extends React.Component {
     { },
     { headers: {Authorization: 'Bearer ' + this.state.token}}).then(r => {
       console.log(r.data);
-      this.setState({ prefcategories: r.data.categories, prefstyles: r.data.styles, name: r.data.name });
+      this.setState({ 
+        prefcategories: r.data.categories, 
+        prefstyles: r.data.styles, 
+        name: r.data.name, 
+        birthdate: r.data.birthdate, 
+        gender:r.data.gender 
+      });
     }).catch(e => { 
       console.log(e);
     }).finally(()=>{})
@@ -175,6 +186,8 @@ class Account extends React.Component {
 
   componentDidUpdate(prevProp, prevState) {
   }
+
+
 
   shouldComponentUpdate(nextProp, nextState) {
     return true;
@@ -333,7 +346,22 @@ class Account extends React.Component {
                       />
                     </Block>
                     <Block style={{marginBottom: 20}}>
-                      <Text></Text>
+                      <SegmentedControl
+                        values={['Female', 'Male', 'It\'s my business']}
+                        selectedIndex={this.state.gender}
+                        onChange={(event) => {
+                            this.setState({gender: event.nativeEvent.selectedSegmentIndex});
+                        }}
+                      />
+                    </Block>
+                    <Block style={{marginBottom: 20}}>
+                      <DateTimePicker
+                          value={this.state.birthdate ? new Date(this.state.birthdate) : new Date()}
+                          display="defaut"
+                          style={styles.windowsPicker}
+                          onChange={(e) => this.setState({birthdate: new Date(e.nativeEvent.timestamp)})}
+                          placeholderText="select date"
+                      />
                     </Block>
                     <Block center>
                     {isLoading  ? <ActivityIndicator/> : (
@@ -418,6 +446,12 @@ const styles = StyleSheet.create({
     zIndex: 2,
     position: 'relative',
     marginTop: '30%'
+  },
+  windowsPicker: {
+
+    paddingTop: 10,
+    height:44,
+   
   },
 });
 

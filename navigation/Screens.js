@@ -21,6 +21,7 @@ import CampaignCreativity from "../screens/CampaignCreativity";
 import CampaignPrefs from "../screens/CampaignPrefs";
 import CampaignTarget from "../screens/CampaignTarget";
 import CampaignAudience from "../screens/CampaignAudience";
+import Connect from "../screens/Connect"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -125,32 +126,30 @@ function ProfileStack(props) {
         options={{
           header: ({ navigation, scene }) => (
             <Header
+              title="Social Connect"
+              back
               transparent
-              white
-              title="Profile"
               navigation={navigation}
               scene={scene}
             />
           ),
-          cardStyle: { backgroundColor: "#FFFFFF" },
-          headerTransparent: true,
+          cardStyle: { backgroundColor: "#F8F9FE" },
         }}
       />
       <Stack.Screen
-        name="Pro"
-        component={Pro}
+        name="Connect"
+        component={Connect}
         options={{
           header: ({ navigation, scene }) => (
             <Header
-              title=""
+              title="Social Connect"
               back
-              white
               transparent
               navigation={navigation}
               scene={scene}
             />
           ),
-          headerTransparent: true,
+          cardStyle: { backgroundColor: "#F8F9FE" },
         }}
       />
     </Stack.Navigator>

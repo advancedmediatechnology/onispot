@@ -66,13 +66,7 @@ class Home extends React.Component {
                 <Text>{item.name}</Text>
               </Block>
             ))}
-          <Button
-            onPress={() =>
-              navigation.navigate("CheckoutForm", { })
-            }
-          >
-            <Text>Stripe</Text>
-          </Button>
+          
           <Card item={articles[0]} horizontal />
           <Block flex row>
             <Card

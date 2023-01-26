@@ -7,10 +7,11 @@ import {
   ScrollView,
   Image,
   ImageBackground,
-  Platform
+  Platform,
+  View
 } from "react-native";
 import { Block, Text, theme, Button } from "galio-framework";
-
+import { WebView } from 'react-native-webview';
 
 
 import { Images, argonTheme } from "../constants";
@@ -25,13 +26,13 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
-class Profile extends React.Component {
+class Connect extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
       token:null,
-      socials:null,
+      social:null,
       socialurl:null,
     };
   }
@@ -60,19 +61,6 @@ class Profile extends React.Component {
     }).finally(()=>{})
   }
 
-  async getSocial() {
-    apiClient.get('socials', 
-    { },
-    { }).then(r => {
-      console.log(r.data.data.socials);
-      this.setState({ 
-        socials: r.data.data.socials,
-      });
-    }).catch(e => { 
-      console.log(e);
-    }).finally(()=>{})
-  }
-
   async getSociaUrl(id) {
     apiClient.get('socials/'+id+'/connect', 
     { },
@@ -84,8 +72,18 @@ class Profile extends React.Component {
     }).finally(()=>{})
   }
 
-  componentDidUpdate(prevProp, prevState) {
-  }
+  componentDidUpdate(prevProps, prevState) {
+    try {
+        const { social } = this.props.route.params
+        //Ensuring This is not the first call to the server
+        if(social && social !== this.state.social) {
+        this.setState({social:social});
+        this.getSociaUrl(social); // Get the new Project when project id Change on Url
+        }
+    } catch(error) {
+        console.log(error);
+    };
+}
 
 
 
@@ -95,50 +93,19 @@ class Profile extends React.Component {
 
   componentDidMount() {
     this.getToken();
-    this.getSocial()
   }
 
   render() {
-    const {socials} = this.state;
     const {socialurl} = this.state;
     const { navigation } = this.props;
     return (
-    
-      <Block flex style={styles.profile}>
-        <Block flex>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              style={{ width, }}
-            >
-              <Block flex style={styles.profileCard}>
-               
-                
-                <Block flex>
-                  <Block middle style={styles.nameInfo}>
-                  {socials &&
-                    socials.map((item, index) => (
-                      <Block
-                        style={{ marginVertical: 5, marginHorizontal: 30 }}
-                        key={item._id}
-                      >
-                        <Button
-                          onPress={() =>
-                            navigation.navigate('Connect',{social: item._id})
-                          }
-                          color={argonTheme.COLORS.PRIMARY}
-                        />
-                        <Text>{item.name}</Text>
-                      </Block>
-                    ))}
-                  </Block>
-                  <Block middle style={{ marginTop: 30, marginBottom: 16 }}>
-                    <Block style={styles.divider} />
-                  </Block>
-                </Block>
-              </Block>
-            </ScrollView>
-        </Block>
-      </Block>  
+        <View style={{ flex: 1 }}>
+            {socialurl && <WebView
+            source={{
+                uri: socialurl,
+            }}
+            />}
+      </View>  
     );
   }
 }
@@ -204,4 +171,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Profile;
+export default Connect;
