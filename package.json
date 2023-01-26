@@ -14,8 +14,8 @@
     "url": "git+https://github.com/creativetimofficial/argon-react-native.git"
   },
   "dependencies": {
-    "@ptomasroos/react-native-multi-slider": "^2.2.2",
     "@react-native-community/datetimepicker": "^6.7.3",
+    "@ptomasroos/react-native-multi-slider": "^2.2.2",
     "@react-native-community/slider": "^4.2.3",
     "@react-native-masked-view/masked-view": "^0.2.7",
     "@react-native-segmented-control/segmented-control": "^2.4.0",
