@@ -1,29 +1,22 @@
 import React from "react";
-import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import {
   StyleSheet,
   Dimensions,
-  ScrollView,
+  FlatList,
   Image,
-  ImageBackground,
+  Alert,
   Platform
 } from "react-native";
+import { LinearGradient } from 'expo-linear-gradient';
 import { Block, Text, theme, Button } from "galio-framework";
-
-
-
 import { Images, argonTheme } from "../constants";
-import { HeaderHeight } from "../constants/utils";
-
+import Icon from "../components/Icon";
+import { HeaderHeight, apiClient } from "../constants/utils";
 const { width, height } = Dimensions.get("screen");
-
 const thumbMeasure = (width - 48 - 32) / 3;
 
-const apiClient = axios.create({
-  baseURL: 'http://test.onispot.com/api/' ,
-  withCredentials: true,
-});
+
 
 class Profile extends React.Component {
 
@@ -32,19 +25,19 @@ class Profile extends React.Component {
     this.state = {
       token:null,
       socials:null,
-      socialurl:null,
     };
   }
 
   async getToken() {
     await SecureStore.getItemAsync('secure_token').then(t =>{
-        this.setState({token:t})
-        this.getUser()
+        this.setState({token:t});
+        this.getUser();
+        this.getSocial();
     });
   }
 
   async getUser() {
-    apiClient.post('user', 
+    await apiClient.post('user', 
     { },
     { headers: {Authorization: 'Bearer ' + this.state.token}}).then(r => {
       console.log(r.data);
@@ -60,10 +53,60 @@ class Profile extends React.Component {
     }).finally(()=>{})
   }
 
-  async getSocial() {
-    apiClient.get('socials', 
-    { },
-    { }).then(r => {
+  showConfirmDialog = (social_connection_id) => {
+    return Alert.alert(
+      "Are your sure?",
+      "Are you sure you want to remove this connection?",
+      [
+        {
+          text: "Yes",
+          onPress: () => {
+            this.delConnection(social_connection_id);
+          },
+        },
+        {
+          text: "No",
+          onPress: () => {
+            return;
+          },
+        },
+      ]
+    );
+  };
+
+  delConnection = async (social_connection_id) => {
+    await apiClient.post('user/social-connections/'+social_connection_id+'/delete', 
+    {},
+    { 
+      headers: {Authorization: 'Bearer ' + this.state.token}
+    }).then(r => {
+      if (r.data.status === 1) {
+        console.log(r.data);
+        this.getSocial();
+      }
+    }).catch(e => { 
+      console.log(e);
+    }).finally(()=>{})
+  }
+
+  connectPage = async (social_connection_id) => {
+    await apiClient.get('user/social-connections/'+social_connection_id+'/facebook-pages', 
+    { 
+      headers: {Authorization: 'Bearer ' + this.state.token}
+    }).then(r => {
+      if (r.data.status === 1) {
+        this.getSocial();
+      }
+    }).catch(e => { 
+      console.log(e);
+    }).finally(()=>{})
+  }
+
+  getSocial = async () => {
+    await apiClient.get('user/socials', 
+    { 
+      headers: {Authorization: 'Bearer ' + this.state.token}
+    }).then(r => {
       console.log(r.data.data.socials);
       this.setState({ 
         socials: r.data.data.socials,
@@ -73,21 +116,8 @@ class Profile extends React.Component {
     }).finally(()=>{})
   }
 
-  async getSociaUrl(id) {
-    apiClient.get('socials/'+id+'/connect', 
-    { },
-    { }).then(r => {
-      console.log(r.data.url);
-      this.setState({socialurl: r.data.url});
-    }).catch(e => { 
-      console.log(e);
-    }).finally(()=>{})
-  }
-
   componentDidUpdate(prevProp, prevState) {
   }
-
-
 
   shouldComponentUpdate(nextProp, nextState) {
     return true;
@@ -95,60 +125,98 @@ class Profile extends React.Component {
 
   componentDidMount() {
     this.getToken();
-    this.getSocial()
+  }
+
+  renderSocials = (item, index) => {
+    const { navigation } = this.props;
+    let socialite_name = item.socialite_name
+    return (
+      <Block
+          style={{ width:'90%', marginVertical: 5, borderColor:argonTheme.COLORS.BORDER, borderWidth:1, borderRadius:10, padding:10 }}
+          key={item._id}
+        >
+          {
+            
+            item.socialconnections &&
+            item.socialconnections.map((item, idex) => 
+              this.renderConnections(item, index, socialite_name)
+            )
+          }
+          <LinearGradient 
+            colors={['#66FCF1',  '#46BAB8']}
+            style={{borderRadius: 30, marginVertical: 10}} 
+            start={{ y: 0.0, x: 0.0 }} end={{ y: 0.0, x: 0.8 }}>
+                <Button
+                  onPress={() =>
+                    navigation.navigate('Connect',{social: item._id})
+                  }
+                  style={styles.button}
+                  color='transparent'
+                  padding='0 0 0 0'
+                >
+                  <Text size={16} style={{color: argonTheme.COLORS.WHITE, fontWeight: '600' }}>Create new {item.name} connection</Text>
+              </Button> 
+          </LinearGradient>
+        </Block>
+    );
+  }
+
+  renderConnections = (item, index, socialite_name) => {
+    let page = false;
+    if (socialite_name === 'facebook') {
+      page = true;
+    }
+    return (
+      <Text size={16} key={item._id}>{item.token.name} 
+      {
+        page && (
+          <Icon
+            onPress={() => this.connectPage(item._id)} 
+            size={20} 
+            name="file" 
+            family="Feather" 
+            style={{ margingLeft: 20 }} color={argonTheme.COLORS.ICON} />
+        )
+      } <Icon 
+        onPress={() => this.showConfirmDialog(item._id)} 
+        size={20} 
+        name="x" 
+        family="Feather" 
+        style={{ margingLeft: 20 }} color={argonTheme.COLORS.ERROR} /></Text>
+      
+    );
   }
 
   render() {
     const {socials} = this.state;
-    const {socialurl} = this.state;
-    const { navigation } = this.props;
     return (
-    
-      <Block flex style={styles.profile}>
-        <Block flex>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              style={{ width, }}
-            >
-              <Block flex style={styles.profileCard}>
-               
-                
-                <Block flex>
-                  <Block middle style={styles.nameInfo}>
-                  {socials &&
-                    socials.map((item, index) => (
-                      <Block
-                        style={{ marginVertical: 5, marginHorizontal: 30 }}
-                        key={item._id}
-                      >
-                        <Button
-                          onPress={() =>
-                            navigation.navigate('Connect',{social: item._id})
-                          }
-                          color={argonTheme.COLORS.PRIMARY}
-                        />
-                        <Text>{item.name}</Text>
-                      </Block>
-                    ))}
-                  </Block>
-                  <Block middle style={{ marginTop: 30, marginBottom: 16 }}>
-                    <Block style={styles.divider} />
-                  </Block>
+      <Block flex>
+          <Text bold size={16} style={styles.titleHead}>
+            Available social connections
+          </Text>
+            <FlatList
+              style={{marginVertical:5}}
+              data={socials}
+              renderItem={({item, index, separators}) => (
+                <Block middle>
+                  { this.renderSocials(item, index) }
                 </Block>
-              </Block>
-            </ScrollView>
-        </Block>
+              )}
+              refreshing={false}
+              onRefresh={() => this.getSocial()}
+            />
       </Block>  
     );
   }
 }
 
 const styles = StyleSheet.create({
-  profile: {
-    marginTop: Platform.OS === "android" ? -HeaderHeight : 0,
-    // marginBottom: -HeaderHeight * 2,
-    flex: 1,
-    backgroundColor: argonTheme.COLORS.WHITE
+ 
+  titleHead: {
+    paddingBottom: 0,
+    paddingLeft: 22,
+    marginTop: 22,
+    color: argonTheme.COLORS.HEADER,
   },
   profileContainer: {
     width: width,
@@ -159,6 +227,18 @@ const styles = StyleSheet.create({
   profileBackground: {
     width: width,
     height: height / 2
+  },
+  button: {
+    width: width - theme.SIZES.BASE * 4,
+    height: theme.SIZES.BASE * 3,
+    shadowRadius: 0,
+    shadowOpacity: 0,
+    borderRadius: 30,
+    borderWidth: 0,
+    marginTop: 0,
+    marginBottom: 0,
+    marginRight: 0,
+    marginLeft: 0,
   },
   profileCard: {
     // position: "relative",
@@ -188,7 +268,7 @@ const styles = StyleSheet.create({
     borderWidth: 0
   },
   nameInfo: {
-    marginTop: 35
+    marginTop: 20
   },
   divider: {
     width: "90%",

@@ -24,6 +24,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
+import {BACKEND_PATH} from "@env"
 
 const numberFormat = (value) =>
     new Intl.NumberFormat('en-US', {
@@ -32,7 +33,7 @@ const numberFormat = (value) =>
 }).format(value);
 
 const apiClient = axios.create({
-  baseURL: 'http://test.onispot.com/api/' ,
+  baseURL: BACKEND_PATH ,
   withCredentials: true,
 });
 

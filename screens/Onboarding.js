@@ -16,7 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
-
+import {BACKEND_PATH} from "@env"
 
 
 class Onboarding extends React.Component {
@@ -65,15 +65,15 @@ class Onboarding extends React.Component {
       return
     }
     const apiClient = axios.create({
-      baseURL: 'http://test.onispot.com/api/' ,
+      baseURL: BACKEND_PATH ,
       withCredentials: true,
     });
     this.setState({isLoading: true});
     apiClient.get('csrf-cookie')
       .then(r => { 
-        console.log(r);
         apiClient.post('login', { 
-          email, password
+          email, 
+          password
         })
         .then(r => {
           console.log(r.data);
@@ -120,11 +120,7 @@ class Onboarding extends React.Component {
           <Block flex center >
             
           </Block>
-          <KeyboardAvoidingView 
-              style={{flex:1}}
-              behavior="padding"
-              enabled
-            >
+          
               <Block flex center space="between" style={styles.padded}>
                 <Image source={Images.LogoOnboarding} style={styles.logo} />
                 <Block flex space="around" style={{ zIndex: 2 }}>
@@ -199,7 +195,7 @@ class Onboarding extends React.Component {
                     </Block>
                 </Block>
               </Block>
-          </KeyboardAvoidingView>
+
       </Block>
     );
   }

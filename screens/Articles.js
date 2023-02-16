@@ -2,51 +2,30 @@
 import { Block, Text, theme } from "galio-framework";
 import {
   Dimensions,
+  View,
   Image,
   ImageBackground,
-  ScrollView,
+  Alert,
   StyleSheet,
   TouchableWithoutFeedback,
+  RefreshControl,
+  Platform,
+  FlatList,
+  Button,
+  TouchableOpacity,
+  TouchableHighlight,
 } from "react-native";
-//argon
+import { SwipeListView } from 'react-native-swipe-list-view';
 import { Images, argonTheme, articles } from "../constants/";
-
 import { Card } from "../components/";
 import React from "react";
-import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
+import {numberFormat, apiClient} from '../constants/utils'
 const { width } = Dimensions.get("screen");
 
 const thumbMeasure = (width - 48 - 32) / 3;
 const cardWidth = width - theme.SIZES.BASE * 2;
-const categories = [
-  {
-    title: "Music Album",
-    description:
-      "Rock music is a genre of popular music. It developed during and after the 1960s in the United Kingdom.",
-    image:
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?fit=crop&w=840&q=80",
-    price: "$125",
-  },
-  {
-    title: "Events",
-    description:
-      "Rock music is a genre of popular music. It developed during and after the 1960s in the United Kingdom.",
-    image:
-      "https://images.unsplash.com/photo-1543747579-795b9c2c3ada?fit=crop&w=840&q=80",
-    price: "$35",
-  },
-];
 
-const apiClient = axios.create({
-  baseURL: 'http://test.onispot.com/api/' ,
-  withCredentials: true,
-});
-
-const numberFormat = (value) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-}).format(value);
 
 class Articles extends React.Component {
   constructor(props) {
@@ -54,179 +33,134 @@ class Articles extends React.Component {
     this.state = {
       token:null,
       campaigns:null,
+      refreshing:false,
     }
+    this.getToken();
   }
 
-  async getCampaign() {
+  async getToken() {
+    await SecureStore.getItemAsync('secure_token').then(t =>{
+        this.setState({token:t});
+        this.getCampaigns();
+    });
+  }
+
+  async getCampaigns() {
     try {
-      apiClient.get('campaign/', 
+      await apiClient.post('campaign/my', 
       { },
       { headers: {Authorization: 'Bearer ' + this.state.token}})
       .then(r => {
-        console.log(r.date);
-        this.setState({campaigns:r.data})
+        let data = r.data;
+        if (this.state.campaigns !== data) {
+          let i = 0;
+          data.forEach(function (element) {
+              element.key = i++;
+          });
+          this.setState({campaigns:data});
+        }
       }).catch(e => { 
         console.log(e);
       }).finally(()=>{});
     } catch(error) {
         console.log(error);
     };
-  
   }
 
-  componentDidMount() {
-    this.getCampaign();
+  async delCampaign(campaign) {
+    console.log('campaign/'+campaign);
+    try {
+      await apiClient.delete('campaign/'+campaign, 
+      { 
+        headers: {Authorization: 'Bearer ' + this.state.token}
+      }).then(r => {
+        console.log(r.data);
+      }).catch(e => { 
+        console.log(e);
+      }).finally(()=>{});
+    } catch(error) {
+        console.log(error);
+    };
   }
 
-  renderProduct = (item, index) => {
+  renderCard = (item, index) => {
     const { navigation } = this.props;
-
     return (
-      <TouchableWithoutFeedback
-        style={{ zIndex: 3 }}
-        key={item._id}
-        onPress={() => navigation.navigate("Newcampaign", { campaign: item._id })}
-      >
-        <Block center style={styles.productItem}>
-          <Image
-            resizeMode="cover"
-            style={styles.productImage}
-            source={{ uri: item.cover_url }}
-          />
-          <Block center style={{ paddingHorizontal: theme.SIZES.BASE }}>
-            <Text
-              center
-              size={16}
-              color={theme.COLORS.MUTED}
-              style={styles.productPrice}
-            >
-              {numberFormat(item.budget)}
-            </Text>
-            <Text center size={34}>
-              {item.name}
-            </Text>
-            <Text
-              center
-              size={16}
-              color={theme.COLORS.MUTED}
-              style={styles.productDescription}
-            >
-              {item.description}
-            </Text>
-          </Block>
-        </Block>
-      </TouchableWithoutFeedback>
-    );
-  };
-
-  renderCards = () => {
-    const {campaigns} = this.state;
-    return (
-      <Block flex style={styles.group}>
-       
-        <Block flex>
-         {/* <Block style={{ paddingHorizontal: theme.SIZES.BASE }}>
-            <Card item={articles[0]} horizontal />
-            <Block flex row>
-              <Card
-                item={articles[1]}
-                style={{ marginRight: theme.SIZES.BASE }}
-              />
-              <Card item={articles[2]} />
-            </Block>
-            <Card item={articles[4]} full />
-            <Block flex card shadow style={styles.category}>
-              <ImageBackground
-                source={{ uri: Images.Products["View article"] }}
-                style={[
-                  styles.imageBlock,
-                  { width: width - theme.SIZES.BASE * 2, height: 252 },
-                ]}
-                imageStyle={{
-                  width: width - theme.SIZES.BASE * 2,
-                  height: 252,
-                }}
-              >
-                <Block style={styles.categoryTitle}>
-                  <Text size={18} bold color={theme.COLORS.WHITE}>
-                    View articlhe
-                  </Text>
-                </Block>
-              </ImageBackground>
-            </Block>
-              </Block> */}
-          <Block flex style={{ marginTop: theme.SIZES.BASE / 2 }}>
-            <ScrollView
-              horizontal={true}
-              pagingEnabled={true}
-              decelerationRate={0}
-              scrollEventThrottle={16}
-              snapToAlignment="center"
-              showsHorizontalScrollIndicator={false}
-              snapToInterval={cardWidth + theme.SIZES.BASE * 0.375}
-              contentContainerStyle={{
-                paddingHorizontal: theme.SIZES.BASE / 2,
-              }}
-            >
-              {campaigns &&
-                campaigns.map((item, index) =>
-                  this.renderProduct(item, index)
-                )}
-            </ScrollView>
-          </Block>
-        </Block>
-      </Block>
-    );
-  };
-
-  renderAlbum = () => {
-    const { navigation } = this.props;
-
-    return (
-      <Block
-        flex
-        style={[styles.group, { paddingBottom: theme.SIZES.BASE * 5 }]}
-      >
-        <Text bold size={16} style={styles.title}>
-          Album
-        </Text>
-        <Block style={{ marginHorizontal: theme.SIZES.BASE * 2 }}>
-          <Block flex right>
-            <Text
-              size={12}
-              color={theme.COLORS.PRIMARY}
-              onPress={() => navigation.navigate("Home")}
-            >
-              View All
-            </Text>
-          </Block>
-          <Block
-            row
-            space="between"
-            style={{ marginTop: theme.SIZES.BASE, flexWrap: "wrap" }}
-          >
-            {Images.Viewed.map((img, index) => (
-              <Block key={`viewed-${img}`} style={styles.shadow}>
-                <Image
-                  resizeMode="cover"
-                  source={{ uri: img }}
-                  style={styles.albumThumb}
-                />
-              </Block>
-            ))}
-          </Block>
-        </Block>
-      </Block>
+        <Card style={{width: cardWidth}} item={item} key={item._id} screenavigation={'Newcampaign'} cta horizontal />
     );
   };
 
   render() {
+    const {campaigns} = this.state;
+    const showConfirmDialog = (rowMap, rowKey) => {
+      return Alert.alert(
+        "Are your sure?",
+        "Are you sure you want to remove this beautiful box?",
+        [
+          {
+            text: "Yes",
+            onPress: () => {
+              deleteRow(rowMap, rowKey);
+            },
+          },
+          {
+            text: "No",
+            onPress: () => {
+              closeRow(rowMap, rowKey);
+            },
+          },
+        ]
+      );
+    };
+    const onRowDidOpen = rowKey => {
+      console.log('This row opened', rowKey);
+    };
+    const closeRow = (rowMap, rowKey) => {
+        if (rowMap[rowKey]) {
+            rowMap[rowKey].closeRow();
+        }
+    };
+    const deleteRow = (rowMap, rowKey) => {
+        closeRow(rowMap, rowKey);
+        const newData = [...campaigns];
+        const prevIndex = campaigns.findIndex(item => item.key === rowKey);
+        const campaign = campaigns[prevIndex];
+        this.delCampaign(campaign._id);
+        newData.splice(prevIndex, 1);
+        this.setState({campaigns:newData});
+    };
+    const renderHiddenItem = (data, rowMap) =>{
+      return (
+        <View style={styles.rowBack}>
+            <Text></Text>
+            <TouchableOpacity
+                style={[styles.backRightBtn, styles.backRightBtnLeft]}
+                onPress={() => closeRow(rowMap, data.item.key)}
+            >
+                <Text style={styles.backTextWhite}></Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={[styles.backRightBtn, styles.backRightBtnRight]}
+                onPress={() => showConfirmDialog(rowMap, data.item.key)}
+            >
+                <Text style={styles.backTextWhite}>Delete</Text>
+            </TouchableOpacity>
+        </View>
+      ); 
+    } 
     return (
       <Block flex center>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {this.renderCards()}
-          {this.renderAlbum()}
-        </ScrollView>
+        <SwipeListView
+            data={campaigns}
+            renderItem={({item, index, separators}) => (
+                this.renderCard(item, index)
+            )}
+            renderHiddenItem={renderHiddenItem}
+            refreshing={false}
+            rightOpenValue={-75}
+            onRefresh={() => this.getCampaigns()}
+            onRowDidOpen={onRowDidOpen}
+        />
       </Block>
     );
   }
@@ -236,6 +170,12 @@ const styles = StyleSheet.create({
   title: {
     paddingBottom: theme.SIZES.BASE,
     paddingHorizontal: theme.SIZES.BASE * 2,
+    marginTop: 22,
+    color: argonTheme.COLORS.HEADER,
+  },
+  titleHead: {
+    paddingBottom: theme.SIZES.BASE,
+    paddingLeft: 22,
     marginTop: 22,
     color: argonTheme.COLORS.HEADER,
   },
@@ -285,6 +225,29 @@ const styles = StyleSheet.create({
   productDescription: {
     paddingTop: theme.SIZES.BASE,
     // paddingBottom: theme.SIZES.BASE * 2,
+  },
+  rowBack: {
+    alignItems: 'center',   
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingLeft: 15,
+  },
+  backRightBtn: {
+    alignItems: 'center',
+    bottom: 16,
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 16,
+    width: 75,
+    borderRadius: 10
+  },
+  backRightBtnRight: {
+    backgroundColor: 'red',
+    right: 0,
+  },
+  backTextWhite: {
+    color: '#FFF',
   },
 });
 

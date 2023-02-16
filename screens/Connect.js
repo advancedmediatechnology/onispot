@@ -10,9 +10,10 @@ import {
   Platform,
   View
 } from "react-native";
+import equal from 'fast-deep-equal'
 import { Block, Text, theme, Button } from "galio-framework";
 import { WebView } from 'react-native-webview';
-
+import {BACKEND_PATH} from "@env"
 
 import { Images, argonTheme } from "../constants";
 import { HeaderHeight } from "../constants/utils";
@@ -22,7 +23,7 @@ const { width, height } = Dimensions.get("screen");
 const thumbMeasure = (width - 48 - 32) / 3;
 
 const apiClient = axios.create({
-  baseURL: 'http://test.onispot.com/api/' ,
+  baseURL: BACKEND_PATH ,
   withCredentials: true,
 });
 
@@ -48,7 +49,6 @@ class Connect extends React.Component {
     apiClient.post('user', 
     { },
     { headers: {Authorization: 'Bearer ' + this.state.token}}).then(r => {
-      console.log(r.data);
       this.setState({ 
         prefcategories: r.data.categories, 
         prefstyles: r.data.styles, 
@@ -61,31 +61,27 @@ class Connect extends React.Component {
     }).finally(()=>{})
   }
 
-  async getSociaUrl(id) {
-    apiClient.get('socials/'+id+'/connect', 
-    { },
-    { }).then(r => {
-      console.log(r.data.url);
-      this.setState({socialurl: r.data.url});
-    }).catch(e => { 
-      console.log(e);
-    }).finally(()=>{})
-  }
 
   componentDidUpdate(prevProps, prevState) {
     try {
         const { social } = this.props.route.params
         //Ensuring This is not the first call to the server
         if(social && social !== this.state.social) {
-        this.setState({social:social});
-        this.getSociaUrl(social); // Get the new Project when project id Change on Url
+          this.setState({social:social});
+        //this.getSociaUrl(social); // Get the new Project when project id Change on Url
         }
     } catch(error) {
         console.log(error);
     };
-}
+  }
 
-
+  /*componentDidUpdate(prevProps) {
+    if(!equal(this.props.route, prevProps.route)) 
+    {
+      const { social } = this.props.route.params
+      this.setState({social:social});
+    }
+  } */
 
   shouldComponentUpdate(nextProp, nextState) {
     return true;
@@ -96,15 +92,19 @@ class Connect extends React.Component {
   }
 
   render() {
-    const {socialurl} = this.state;
+    const {social} = this.state;
+    const {token} = this.state;
     const { navigation } = this.props;
+    console.log('https://test.onispot.com/authenticated-iframe/'+token+'/'+social);
     return (
         <View style={{ flex: 1 }}>
-            {socialurl && <WebView
-            source={{
-                uri: socialurl,
-            }}
-            />}
+            {social && token &&
+                <WebView
+                    source={{
+                        uri: 'https://test.onispot.com/authenticated-iframe/'+token+'/'+social,/*uri: 'http://test.onispot.com/api/socials/'+social+'/connect/?token='+token,*/  headers: {Authorization: "Bearer "+this.state.token}
+                    }}
+                />
+            }
       </View>  
     );
   }

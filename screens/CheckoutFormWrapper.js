@@ -11,24 +11,18 @@ import { Block, Checkbox, theme, Text,  Button } from "galio-framework";
 import {
   Dimensions,
   StyleSheet,
-  
   View,
   Pressable,
   Platform,
 } from "react-native";
-
+import {BACKEND_PATH} from "@env"
 import { LinearGradient } from 'expo-linear-gradient';
 const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
-
-const numberFormat = (value) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-}).format(value);
+import {numberFormat} from '../constants/utils'
 
 const apiClient = axios.create({
-  baseURL: 'http://test.onispot.com/api/' ,
+  baseURL: BACKEND_PATH ,
   withCredentials: true,
 });
 
@@ -58,17 +52,16 @@ const ProductsScreen = ({ campaign_id, navigateToCheckout }) => {
 
   const handleContinuePress = async () => {
     /* Send the cart to the server */
-    const URL = "http://test.onispot.com/api/new-payment-intent/?amount="+campaignrobuy.budget+"&campaign_id="+campaignrobuy._id;
+    const URL = BACKEND_PATH+"new-payment-intent/?amount="+campaignrobuy.budget+"&campaign_id="+campaignrobuy._id;
     const response = await fetch(URL, {
       method: "GET",
       headers: {
         "Content-Type": "application-json",
-      },
+        },
     });
 
     /* Await the response */
-    const { publishableKey, clientSecret, merchantName } =
-      await response.json();
+    const { publishableKey, clientSecret, merchantName } = await response.json();
 
     /* Navigate to the CheckoutScreen */
     /* You can use navigation.navigate from react-navigation */

@@ -10,8 +10,13 @@ import CustomDrawerContent from "./Menu";
 import Elements from "../screens/Elements";
 // screens
 import Home from "../screens/Home";
+import Enroll from "../screens/Enroll";
+import EnrolledCampaigns from "../screens/EnrolledCampaigns";
 import Onboarding from "../screens/Onboarding";
 import Pro from "../screens/Pro";
+import Post from "../screens/Post";
+import SocialConnections from "../screens/SocialConnections";
+import Publication from "../screens/Publication";
 import Profile from "../screens/Profile";
 import React from "react";
 import Register from "../screens/Register";
@@ -33,143 +38,18 @@ const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
-function ElementsStack(props) {
+function MyCampaignsStack(props) {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        mode: "card",
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen
-        name="Elements"
-        component={Elements}
-        options={{
-          header: ({ navigation, scene }) => (
-            <Header title="Elements" navigation={navigation} scene={scene} />
-          ),
-          cardStyle: { backgroundColor: "#F8F9FE" },
-        }}
-      />
-      <Stack.Screen
-        name="Pro"
-        component={Pro}
-        options={{
-          header: ({ navigation, scene }) => (
-            <Header
-              title=""
-              back
-              white
-              transparent
-              navigation={navigation}
-              scene={scene}
-            />
-          ),
-          headerTransparent: true,
-        }}
-      />
-    </Stack.Navigator>
-  );
-}
-
-function ArticlesStack(props) {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        mode: "card",
-        headerShown: "screen",
-      }}
-    >
+    <Stack.Navigator screenOptions={{ mode: "card", headerShown: "screen",}}>
       <Stack.Screen
         name="Articles"
         component={Articles}
         options={{
           header: ({ navigation, scene }) => (
-            <Header title="Articles" navigation={navigation} scene={scene} />
-          ),
-          cardStyle: { backgroundColor: "#F8F9FE" },
-        }}
-      />
-      <Stack.Screen
-        name="Pro"
-        component={Pro}
-        options={{
-          header: ({ navigation, scene }) => (
-            <Header
-              title=""
-              back
-              white
-              transparent
-              navigation={navigation}
-              scene={scene}
-            />
-          ),
-          headerTransparent: true,
-        }}
-      />
-    </Stack.Navigator>
-  );
-}
-
-function ProfileStack(props) {
-  return (
-    <Stack.Navigator
-      initialRouteName="Profile"
-      screenOptions={{
-        mode: "card",
-        headerShown: "screen",
-      }}
-    >
-      <Stack.Screen
-        name="ProfileInt"
-        component={Profile}
-        options={{
-          header: ({ navigation, scene }) => (
-            <Header
-              title="Social Connect"
-              back
-              transparent
-              navigation={navigation}
-              scene={scene}
-            />
-          ),
-          cardStyle: { backgroundColor: "#F8F9FE" },
-        }}
-      />
-      <Stack.Screen
-        name="Connect"
-        component={Connect}
-        options={{
-          header: ({ navigation, scene }) => (
-            <Header
-              title="Social Connect"
-              back
-              transparent
-              navigation={navigation}
-              scene={scene}
-            />
-          ),
-          cardStyle: { backgroundColor: "#F8F9FE" },
-        }}
-      />
-    </Stack.Navigator>
-  );
-}
-
-function HomeStack(props) {
-  return (
-    <Stack.Navigator screenOptions={{ mode: "card", headerShown: "screen" }}>
-      <Stack.Screen
-        name="HomeInt"
-        component={Home}
-        options={{
-          header: ({ navigation, scene }) => (
-            <Header
-              title="Home"
-              search
-              options
-              navigation={navigation}
-              scene={scene}
+            <Header 
+              title="My campaigns"
+              navigation={navigation} 
+              scene={scene} 
             />
           ),
           cardStyle: { backgroundColor: "#F8F9FE" },
@@ -183,7 +63,6 @@ function HomeStack(props) {
             <Header
               title="Campaign"
               back
-              transparent
               navigation={navigation}
               scene={scene}
             />
@@ -199,7 +78,6 @@ function HomeStack(props) {
             <Header
               title="Campaign creativity"
               back
-              transparent
               navigation={navigation}
               scene={scene}
             />
@@ -215,10 +93,8 @@ function HomeStack(props) {
             <Header
               title="Campaign categories & styles"
               back
-              transparent
               navigation={navigation}
               scene={scene}
-              tabIndex={0}
             />
           ),
           cardStyle: { backgroundColor: "#F8F9FE" },
@@ -232,10 +108,8 @@ function HomeStack(props) {
             <Header
               title="Campaign target"
               back
-              transparent
               navigation={navigation}
               scene={scene}
-              tabIndex={0}
             />
           ),
           cardStyle: { backgroundColor: "#F8F9FE" },
@@ -249,10 +123,8 @@ function HomeStack(props) {
             <Header
               title="Campaign audience"
               back
-              transparent
               navigation={navigation}
               scene={scene}
-              tabIndex={0}
             />
           ),
           cardStyle: { backgroundColor: "#F8F9FE" },
@@ -277,6 +149,145 @@ function HomeStack(props) {
   );
 }
 
+function SocialStack(props) {
+  return (
+    <Stack.Navigator screenOptions={{ mode: "card", headerShown: "screen", }}>
+      <Stack.Screen
+        name="Socials"
+        component={Profile}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Socials"
+              navigation={navigation}
+              scene={scene}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="Connect"
+        component={Connect}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Social Connect"
+              back
+              navigation={navigation}
+              scene={scene}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function HomeStack(props) {
+  return (
+    <Stack.Navigator screenOptions={{ mode: "card",  headerShown: "screen" }}>
+      <Stack.Screen
+        name="HomeInt"
+        component={Home}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Home"
+              search
+              navigation={navigation}
+              scene={scene}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="Enrollcampaign"
+        component={Enroll}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Enroll"
+              back
+              navigation={navigation}
+              scene={scene}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function EnrolledStack(props) {
+  return (
+    <Stack.Navigator screenOptions={{mode: "card", headerShown: "screen",}} >
+      <Stack.Screen
+        name="EnrolledInt"
+        component={EnrolledCampaigns}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header 
+              title="Enrolled campaigns" 
+              navigation={navigation} 
+              scene={scene} 
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="Post"
+        component={Post}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header 
+              title="Post" 
+              back
+              navigation={navigation} 
+              scene={scene} 
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="SocialConnection"
+        component={SocialConnections}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header 
+              title="Social connection" 
+              back
+              navigation={navigation} 
+              scene={scene} 
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="Publications"
+        component={Publication}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header 
+              title="Publications" 
+              back
+              navigation={navigation} 
+              scene={scene} 
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function AccountStack(props) {
   return (
     <Stack.Navigator screenOptions={{mode: "card", headerShown: "screen",}} >
@@ -289,8 +300,7 @@ function AccountStack(props) {
               title="Account" 
               navigation={navigation} 
               scene={scene} 
-              transparent
-              tabs={[{id: 'personal', title: 'Personal data'},{id: 'preferences', title: 'Categories'},{id: 'styles', title: 'Styles'}]}
+              tabs={[{id: 'wallet', title: 'Wallet'},{id: 'personal', title: 'Personal data'},{id: 'preferences', title: 'Categories'},{id: 'styles', title: 'Styles'},{id: 'audience', title: 'My audience'}]}
               tabIndex={0}
             />
           ),
@@ -367,8 +377,8 @@ function AppStack(props) {
         }}
       />
       <Drawer.Screen
-        name="Profile"
-        component={ProfileStack}
+        name="Socials"
+        component={SocialStack}
         options={{
           headerShown: false,
         }}
@@ -376,21 +386,21 @@ function AppStack(props) {
       <Drawer.Screen
         name="Account"
         component={AccountStack}
-        initialParams={{ itemId: 'personal' }}
+        initialParams={{ itemId: 'wallet' }}
         options={{
           headerShown: false,
         }}
       />
       <Drawer.Screen
-        name="Elements"
-        component={ElementsStack}
+        name="My campaigns"
+        component={MyCampaignsStack}
         options={{
           headerShown: false,
         }}
       />
       <Drawer.Screen
-        name="My Campaign"
-        component={ArticlesStack}
+        name="Enrolled campaigns"
+        component={EnrolledStack}
         options={{
           headerShown: false,
         }}

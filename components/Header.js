@@ -2,7 +2,7 @@ import React from 'react';
 import { withNavigation } from '@react-navigation/compat';
 import { TouchableOpacity, StyleSheet, Platform, Dimensions } from 'react-native';
 import { Button, Block, NavBar, Text, theme } from 'galio-framework';
-
+import * as SecureStore from 'expo-secure-store';
 import Icon from './Icon';
 import Input from './Input';
 import Tabs from './Tabs';
@@ -11,8 +11,10 @@ import argonTheme from '../constants/Theme';
 const { height, width } = Dimensions.get('window');
 const iPhoneX = () => Platform.OS === 'ios' && (height === 812 || width === 812 || height === 896 || width === 896);
 
+
+
 const BellButton = ({isWhite, style, navigation}) => (
-  <TouchableOpacity style={[styles.button, style]} onPress={() => navigation.navigate('Pro')}>
+  <TouchableOpacity style={[styles.button, style]} >
     <Icon
       family="ArgonExtra"
       size={16}
@@ -34,6 +36,17 @@ const AddButton = ({isWhite, style, navigation}) => (
   </TouchableOpacity>
 );
 
+const LogOutButton = ({isWhite, style, navigation}) => (
+  <TouchableOpacity style={[styles.button, style]} onPress={() => navigation.navigate('Newcampaign')}>
+    <Icon
+      family="Feather"
+      size={30}
+      name="log-out"
+      color={argonTheme.COLORS[isWhite ? 'WHITE' : 'ICON']}
+    />
+  </TouchableOpacity>
+);
+
 const BasketButton = ({isWhite, style, navigation}) => (
   <TouchableOpacity style={[styles.button, style]} onPress={() => navigation.navigate('Pro')}>
     <Icon
@@ -46,7 +59,7 @@ const BasketButton = ({isWhite, style, navigation}) => (
 );
 
 const SearchButton = ({isWhite, style, navigation}) => (
-  <TouchableOpacity style={[styles.button, style]} onPress={() => navigation.navigate('Pro')}>
+  <TouchableOpacity style={[styles.button, style]} >
     <Icon
       size={16}
       family="Galio"
@@ -71,16 +84,20 @@ class Header extends React.Component {
       ]
     }
 
+    gosearch = (searchkey) => {
+      const {  navigation } = this.props;
+      if (searchkey.length > 3) {
+        navigation.navigate('HomeInt', { searchkey: searchkey })
+      }
+      console.log(searchkey)
+    }
+
     switch (title) {
-      case 'Home':
+      case 'My campaigns':
         return ([
           <AddButton key='chat-categories' navigation={navigation} />,
         ]);
-      case 'Deals':
-        return ([
-          <BellButton key='chat-categories' navigation={navigation} />,
-          <BasketButton key='basket-categories' navigation={navigation} />
-        ]);
+     
       case 'Categories':
         return ([
           <BellButton key='chat-categories' navigation={navigation} isWhite={white} />,
@@ -120,7 +137,7 @@ class Header extends React.Component {
         style={styles.search}
         placeholder="What are you looking for?"
         placeholderTextColor={'#8898AA'}
-        onFocus={() => navigation.navigate('Pro')}
+        onChange={(e) =>  gosearch(e.nativeEvent.text)}
         iconContent={<Icon size={16} color={theme.COLORS.MUTED} name="search-zoom-in" family="ArgonExtra" />}
       />
     );

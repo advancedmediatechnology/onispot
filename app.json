@@ -10,6 +10,7 @@
           "microphonePermission": false
         }
       ],
+      
       [
         "@stripe/stripe-react-native",
         {

@@ -22,10 +22,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
-
+import {BACKEND_PATH} from "@env"
 
 const apiClient = axios.create({
-  baseURL: 'http://test.onispot.com/api/' ,
+  baseURL: BACKEND_PATH ,
   withCredentials: true,
 });
 
@@ -56,7 +56,7 @@ class CampaignPrefs extends React.Component {
 
   async getCategories() {
     try {
-      const response = await fetch('http://test.onispot.com/api/categories');
+      const response = await fetch(BACKEND_PATH+'categories');
       const json = await response.json();
       this.setState({ categories: json });
     } catch (error) {
@@ -68,7 +68,7 @@ class CampaignPrefs extends React.Component {
 
   async getStyles() {
     try {
-      const response = await fetch('http://test.onispot.com/api/styles');
+      const response = await fetch(BACKEND_PATH+'styles');
       const json = await response.json();
       this.setState({ appstyles: json });
     } catch (error) {

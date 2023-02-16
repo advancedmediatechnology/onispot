@@ -25,10 +25,11 @@ import SegmentedControl from '@react-native-segmented-control/segmented-control'
 const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
+import {BACKEND_PATH} from "@env"
 
 
 const apiClient = axios.create({
-  baseURL: 'http://test.onispot.com/api/' ,
+  baseURL: BACKEND_PATH ,
   withCredentials: true,
 });
 
@@ -43,8 +44,10 @@ class CampaignTarget extends React.Component {
             age_end:0,
             age_range:[],
             gender:null,
+            prefsocials:[],
             objcampaign:null,
             isLoading: false,
+            socials:[],
         };
     }
 
@@ -59,13 +62,16 @@ class CampaignTarget extends React.Component {
     async getCampaign(campaign) {
         try {
             apiClient.get('campaign/'+campaign, 
-            { },
             { headers: {Authorization: 'Bearer ' + this.state.token}})
             .then(r => {
                 this.setState({objcampaign:r.data, age_range:r.data.age_range, gender:r.data.gender});
                 if (r.data.age_range) {
                     this.setState({age_start:r.data.age_range[0],age_end:r.data.age_range[1]});
                 }
+                if (r.data.socials) {
+                    this.setState({prefsocials:r.data.socials})
+                }
+                this.getSocial();
             }).catch(e => { 
                 console.log(e);
             }).finally(()=>{});
@@ -75,6 +81,18 @@ class CampaignTarget extends React.Component {
     
     }
 
+    async getSocial() {
+        apiClient.get('user/socials', 
+        {headers: {Authorization: 'Bearer ' + this.state.token}}).then(r => {
+          console.log(r.data.data.socials);
+          this.setState({ 
+            socials: r.data.data.socials,
+          });
+        }).catch(e => { 
+          console.log(e);
+        }).finally(()=>{})
+      }
+
     async updateCampaign() {
         const { navigation } = this.props;
         this.setState({isLoading: true});
@@ -82,6 +100,7 @@ class CampaignTarget extends React.Component {
         apiClient.post('campaign'+id, { 
             age_range:[this.state.age_start, this.state.age_end],
             gender:this.state.gender,
+            socials:this.state.prefsocials,
         },
         { headers: {Authorization: 'Bearer ' + this.state.token}})
         .then(r => {
@@ -99,6 +118,14 @@ class CampaignTarget extends React.Component {
         .finally(()=>{
             this.setState({isLoading: false});
         })
+    }
+
+    checkBoxSocial(val) {
+        if (this.state.prefsocials.includes(val)){
+            this.state.prefsocials.splice(this.state.prefsocials.indexOf(val), 1);
+        } else {
+            this.state.prefsocials.push(val);
+        }
     }
 
     /* lifecycle */
@@ -165,41 +192,82 @@ class CampaignTarget extends React.Component {
                     }}
                 />
             </Block>
-            <Block center>
-                    {isLoading  ? <ActivityIndicator/> : (
-                        <LinearGradient colors={['#66FCF1',  '#46BAB8']}
-                        style={{borderRadius: 30}} 
-                        start={{ y: 0.0, x: 0.0 }} end={{ y: 0.0, x: 1.1 }}>
-                        <Button
-                            style={styles.button}
-                            color='transparent'
-                            padding='0 0 0 0'
-                            onPress={() => this.updateCampaign()}
-                            textStyle={{ color: argonTheme.COLORS.WHITE, fontWeight: '500'  }}
-                        >
-                            NEXT
-                        </Button>
-                        </LinearGradient>
-                    )}
-            </Block>
+            
+            
         </Block>
         )
     }
 
-    renderPersonal = () => {
-    return (
-        <Block flex style={styles.container}>
-            <Block flex space="between" style={styles.padded}>
-                {this.renderTarget()}
+    renderSocials= () => {
+        const { socials } = this.state;
+        return (
+            <Block flex style={styles.container}>
+            <Text style={{marginLeft:14, fontWeight:'500',marginBottom: 0}}>Socials</Text>
+            <Block flex center style={{margin:20}}>
+                <ScrollView
+                showsVerticalScrollIndicator={true}>
+                <Block flex>
+                    {socials.length > 0  &&
+                    socials.map((item, index) =>
+                        this.renderCheckBoxSocial(item, index)
+                    )
+                    }
+                </Block>
+                </ScrollView>
             </Block>
-        </Block>
-    );
+            </Block>
+        )
+    }
+
+      renderCheckBoxSocial = (item, index) => {
+        return (
+          <Block style={{marginVertical:5,marginHorizontal:30}} key={item._id}>
+            <Checkbox
+                checkboxStyle={{
+                  borderWidth: 3
+                }}
+                onChange={() => this.checkBoxSocial(item._id)}
+                color={argonTheme.COLORS.PRIMARY}
+                initialValue={this.state.objcampaign.socials ? this.state.objcampaign.socials.includes(item._id) : null}
+                label={item.name}
+            />
+          </Block>
+        )
+      }
+
+    render = () => {
+    const { isLoading } = this.state;
+        return (
+            <Block flex style={styles.container}>
+                <Block flex space="between" style={styles.padded}>
+                    {this.renderTarget()}
+                    {this.renderSocials()}
+                    <Block center>
+                        {isLoading  ? <ActivityIndicator/> : (
+                            <LinearGradient colors={['#66FCF1',  '#46BAB8']}
+                            style={{borderRadius: 30}} 
+                            start={{ y: 0.0, x: 0.0 }} end={{ y: 0.0, x: 1.1 }}>
+                            <Button
+                                style={styles.button}
+                                color='transparent'
+                                padding='0 0 0 0'
+                                onPress={() => this.updateCampaign()}
+                                textStyle={{ color: argonTheme.COLORS.WHITE, fontWeight: '500'  }}
+                            >
+                                NEXT
+                            </Button>
+                            </LinearGradient>
+                        )}
+                </Block>
+                </Block>
+            </Block>
+        );
 
     }
 
-    render() {
+    /*render() {
         return this.renderPersonal();
-    }
+    }*/
 
 }
 

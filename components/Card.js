@@ -9,8 +9,7 @@ import { argonTheme } from '../constants';
 
 class Card extends React.Component {
   render() {
-    const { navigation, item, horizontal, full, style, ctaColor, imageStyle } = this.props;
-    
+    const { navigation, item, subitem, horizontal, full, style, ctaColor, imageStyle, cta, publications, screenavigation } = this.props;
     const imageStyles = [
       full ? styles.fullImage : styles.horizontalImage,
       imageStyle
@@ -20,18 +19,28 @@ class Card extends React.Component {
       horizontal ? styles.horizontalStyles : styles.verticalStyles,
       styles.shadow
     ];
+    let name = item.name;
+    let cover_url = item.cover_url
+    let description = item.description
+    if (subitem) {
+      name = subitem.name;
+      cover_url = subitem.cover_url
+      description = subitem.description;
+    }
 
     return (
       <Block row={horizontal} card flex style={cardContainer}>
-        <TouchableWithoutFeedback onPress={() => navigation.navigate("Newcampaign", { campaign: item.id })}>
+        <TouchableWithoutFeedback onPress={() => cta && navigation.navigate(screenavigation, { campaign: item._id })}>
           <Block flex style={imgContainer}>
-            <Image source={{uri: item.cover_url}} style={imageStyles} />
+            <Image source={{uri: cover_url}} style={imageStyles} />
           </Block>
         </TouchableWithoutFeedback>
-        <TouchableWithoutFeedback onPress={() => navigation.navigate("Newcampaign", { campaign: item.id })}>
+        <TouchableWithoutFeedback onPress={() => cta && navigation.navigate(screenavigation, { campaign: item._id })}>
           <Block flex space="between" style={styles.cardDescription}>
-            <Text size={14} style={styles.cardTitle}>{item.name}</Text>
-            <Text size={12} muted={!ctaColor} color={ctaColor || argonTheme.COLORS.ACTIVE} bold>{item.cta}</Text>
+            <Text size={14} style={styles.cardTitle} bold>{name}</Text>
+            <Text size={14} style={styles.cardTitle}>{description}</Text>
+            {publications && (<Text size={14} style={styles.cardTitle}>bound posts: {item.publications.length}</Text>)}
+            
           </Block>
         </TouchableWithoutFeedback>
       </Block>
@@ -41,10 +50,14 @@ class Card extends React.Component {
 
 Card.propTypes = {
   item: PropTypes.object,
+  subitem: PropTypes.object,
   horizontal: PropTypes.bool,
   full: PropTypes.bool,
   ctaColor: PropTypes.string,
   imageStyle: PropTypes.any,
+  cta: PropTypes.bool,
+  publications: PropTypes.bool,
+  screenavigation: PropTypes.string,
 }
 
 const styles = StyleSheet.create({
@@ -52,13 +65,14 @@ const styles = StyleSheet.create({
     backgroundColor: theme.COLORS.WHITE,
     marginVertical: theme.SIZES.BASE,
     borderWidth: 0,
-    minHeight: 114,
+    minHeight: 120,
     marginBottom: 16
   },
   cardTitle: {
     flex: 1,
     flexWrap: 'wrap',
     paddingBottom: 6
+    
   },
   cardDescription: {
     padding: theme.SIZES.BASE / 2
@@ -72,7 +86,7 @@ const styles = StyleSheet.create({
     // borderRadius: 3,
   },
   horizontalImage: {
-    height: 122,
+    height: 130,
     width: 'auto',
   },
   horizontalStyles: {

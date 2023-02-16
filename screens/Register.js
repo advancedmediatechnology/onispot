@@ -14,9 +14,14 @@ import { Block, Checkbox, Button, Text, theme } from "galio-framework";
 import { Input, Icon,  DrawerItem as DrawerCustomItem } from "../components";
 import { LinearGradient } from 'expo-linear-gradient';
 const { height, width } = Dimensions.get("screen");
-
+import {BACKEND_PATH} from "@env"
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
+
+const apiClient = axios.create({
+  baseURL: BACKEND_PATH ,
+  withCredentials: true,
+});
 
 class Register extends React.Component {
   
@@ -84,10 +89,7 @@ class Register extends React.Component {
       alert("You must agree with the privacy policy");
       return;
     }
-    const apiClient = axios.create({
-      baseURL: 'http://test.onispot.com/api/' ,
-      withCredentials: true,
-    });
+    
     this.setState({isLoading: true});
     apiClient.get('csrf-cookie')
       .then(r => { 

@@ -1,7 +1,6 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, Linking } from "react-native";
 import { Block, Text, theme } from "galio-framework";
-
 import Icon from "./Icon";
 import argonTheme from "../constants/Theme";
 
@@ -13,46 +12,47 @@ class DrawerItem extends React.Component {
       case "Home":
         return (
           <Icon
-            name="shop"
-            family="ArgonExtra"
-            size={14}
+            name="home"
+            family="Entypo"
+            size={20}
             color={focused ? "white" : argonTheme.COLORS.PRIMARY}
           />
         );
-      case "Elements":
+      
+      case "My campaigns":
+      return (
+        <Icon
+          name="megaphone"
+          family="Entypo"
+          size={20}
+          color={focused ? "white" : argonTheme.COLORS.PRIMARY}
+        />
+      );
+      case "Enrolled campaigns":
         return (
           <Icon
-            name="map-big"
-            family="ArgonExtra"
-            size={14}
-            color={focused ? "white" : argonTheme.COLORS.ERROR}
-          />
-        );
-      case "Articles":
-        return (
-          <Icon
-            name="spaceship"
-            family="ArgonExtra"
-            size={14}
+            name="power-plug"
+            family="Entypo"
+            size={20}
             color={focused ? "white" : argonTheme.COLORS.PRIMARY}
           />
-        );
-      case "Profile":
+      );
+      case "Socials":
         return (
           <Icon
-            name="chart-pie-35"
-            family="ArgonExtra"
-            size={14}
-            color={focused ? "white" : argonTheme.COLORS.WARNING}
+            name="shareable"
+            family="Entypo"
+            size={20}
+            color={focused ? "white" : argonTheme.COLORS.PRIMARY}
           />
         );
       case "Account":
         return (
           <Icon
-            name="calendar-date"
-            family="ArgonExtra"
-            size={14}
-            color={focused ? "white" : argonTheme.COLORS.INFO}
+            name="user"
+            family="Entypo"
+            size={20}
+            color={focused ? "white" : argonTheme.COLORS.PRIMARY}
           />
         );
       case "Getting Started":
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16
   },
   activeStyle: {
-    backgroundColor: argonTheme.COLORS.ACTIVE,
+    backgroundColor: argonTheme.COLORS.PRIMARY,
     borderRadius: 4
   },
   shadow: {

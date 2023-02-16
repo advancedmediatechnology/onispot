@@ -22,11 +22,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
-import Images from "../constants/Images";
+import {BACKEND_PATH} from "@env"
 
 
 const apiClient = axios.create({
-  baseURL: 'http://test.onispot.com/api/' ,
+  baseURL: BACKEND_PATH ,
   withCredentials: true,
 });
 
@@ -211,7 +211,7 @@ class CampaignCreativity extends React.Component {
       let type = match ? witch + `/${match[1]}` : witch;
       data.append('file_attachment', { uri: localUri, name: filename, type });
       await fetch(
-        'http://test.onispot.com/api/image-upload',
+        BACKEND_PATH+'image-upload',
         {
           method: 'post',
           body: data,
@@ -254,7 +254,7 @@ class CampaignCreativity extends React.Component {
       let type = fileToUpload.mimeType;
       data.append('file_attachment', { uri: localUri, name: filename, type });
       await fetch(
-        'http://test.onispot.com/api/image-upload',
+        BACKEND_PATH+'image-upload',
         {
           method: 'post',
           body: data,
@@ -356,9 +356,10 @@ class CampaignCreativity extends React.Component {
                 </Block>
                 <Block center>
                 {isLoading  ? <ActivityIndicator/> : (
-                    <LinearGradient colors={['#66FCF1',  '#46BAB8']}
-                    style={{borderRadius: 30}} 
-                    start={{ y: 0.0, x: 0.0 }} end={{ y: 0.0, x: 1.1 }}>
+                    <LinearGradient 
+                      colors={['#66FCF1',  '#46BAB8']}
+                      style={{borderRadius: 30}} 
+                      start={{ y: 0.0, x: 0.0 }} end={{ y: 0.0, x: 1.1 }}>
                     <Button
                         style={styles.button}
                         color='transparent'

@@ -1,9 +1,7 @@
 import React from "react";
-import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-
 import {
   StyleSheet,
   Image,
@@ -22,13 +20,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
-
-
-const apiClient = axios.create({
-  baseURL: 'http://test.onispot.com/api/' ,
-  withCredentials: true,
-});
-
+import {numberFormat, apiClient} from '../constants/utils'
+import {BACKEND_PATH} from "@env"
 
 class Campaign extends React.Component {
   
@@ -216,7 +209,7 @@ class Campaign extends React.Component {
       let type = match ? witch + `/${match[1]}` : witch;
       data.append('file_attachment', { uri: localUri, name: filename, type });
       await fetch(
-        'http://test.onispot.com/api/'+witch+'-upload',
+        BACKEND_PATH+witch+'-upload',
         {
           method: 'post',
           body: data,
@@ -244,7 +237,6 @@ class Campaign extends React.Component {
         this.setState({isLoadingImage: false});
       })
     } else {
-      //if no file selected the show alert
       alert('Please Select File first');
     }
   }
